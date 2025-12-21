@@ -1,0 +1,68 @@
+# ==============================
+# Node / NPM / Yarn / PNPM
+# ==============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ==============================
+# Next.js
+# ==============================
+.next/
+out/
+dist/
+build/
+.vercel/
+.turbo/
+
+# ==============================
+# Environment Variables
+# ==============================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ==============================
+# TypeScript
+# ==============================
+*.tsbuildinfo
+
+# ==============================
+# Logs
+# ==============================
+logs/
+*.log
+
+# ==============================
+# OS / Editor Files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# ==============================
+# Testing
+# ==============================
+coverage/
+.playwright/
+
+# ==============================
+# Database / Backend
+# ==============================
+# MongoDB local files
+data/
+dump/
+
+# ==============================
+# Misc
+# ==============================
+.cache/
+.eslintcache
