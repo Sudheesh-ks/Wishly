@@ -10,13 +10,18 @@ import GiftCard from '@/components/GiftCard';
 import LetterEditor from '@/components/LetterEditor';
 import { useSoundManager } from '@/components/SoundManager';
 import { useGift } from '@/context/GiftContext';
+import { useLetter } from '@/context/LetterContext';
 
 export default function DashboardPage() {
     const { isPlaying, toggleMusic } = useSoundManager();
     const { gifts } = useGift();
+    const { appendGift } = useLetter();
 
     const handleAddToLetter = (giftName: string) => {
-        alert(`Added ${giftName} to your letter!`);
+        appendGift(giftName);
+        // Scroll to editor
+        const editor = document.getElementById('letter-editor');
+        if (editor) editor.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
@@ -26,15 +31,15 @@ export default function DashboardPage() {
             {/* Dashboard Navbar */}
             <AppBar position="static" color="transparent" elevation={0} sx={{ pt: 2 }}>
                 <Toolbar>
-                    <Typography variant="h5" sx={{ flexGrow: 1, color: '#D42426', fontFamily: 'var(--font-mountains)' }}>
-                        My Workshop
+                    <Typography variant="h4" sx={{ flexGrow: 1, color: '#D42426', fontFamily: 'var(--font-mountains)' }}>
+                        Wishly
                     </Typography>
 
                     <IconButton onClick={toggleMusic} sx={{ color: '#F8B229', mr: 2, border: '1px solid #F8B229' }}>
                         {isPlaying ? <MusicNoteIcon /> : <MusicOffIcon />}
                     </IconButton>
 
-                    <IconButton component={Link} href="/" sx={{ color: 'white' }}>
+                    <IconButton onClick={() => { localStorage.removeItem('token'); window.location.href = '/login'; }} sx={{ color: 'white' }}>
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
@@ -54,7 +59,7 @@ export default function DashboardPage() {
                 </Typography>
                 <Grid container spacing={4} justifyContent="center" sx={{ mb: 12 }}>
                     {gifts.map((gift) => (
-                        <Grid key={gift.id} size={{ xs: 12, md: 4 }}>
+                        <Grid key={gift._id || gift.title} size={{ xs: 12, md: 4 }}>
                             <GiftCard
                                 title={gift.title}
                                 image={gift.image}

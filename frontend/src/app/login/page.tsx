@@ -1,16 +1,34 @@
 'use client';
 
-import { Container, Box, Typography, Button, Paper } from '@mui/material';
+import { Container, Box, Typography, Paper, AppBar, Toolbar, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
-import GoogleIcon from '@mui/icons-material/Google';
-import PersonIcon from '@mui/icons-material/Person';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import MusicOffIcon from '@mui/icons-material/MusicOff';
 import Link from 'next/link';
 import Snowfall from '@/components/Snowfall';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
+import { useSoundManager } from '@/components/SoundManager';
 
 export default function LoginPage() {
+
+    const { isPlaying, toggleMusic } = useSoundManager();
+
     return (
-        <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <Box sx={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
             <Snowfall />
+
+            <AppBar position="static" color="transparent" elevation={0} sx={{ pt: 2 }}>
+                <Toolbar>
+                    <Typography variant="h4" sx={{ flexGrow: 1, color: '#D42426', fontFamily: 'var(--font-mountains)' }}>
+                        Wishly
+                    </Typography>
+
+                    <IconButton onClick={toggleMusic} sx={{ color: '#F8B229', mr: 2, border: '1px solid #F8B229' }}>
+                        {isPlaying ? <MusicNoteIcon /> : <MusicOffIcon />}
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
+
             <Container maxWidth="sm">
                 <Box
                     component={motion.div}
@@ -39,33 +57,7 @@ export default function LoginPage() {
                             To send your letter to Santa, please identify yourself.
                         </Typography>
 
-                        <Button
-                            variant="outlined"
-                            size="large"
-                            fullWidth
-                            startIcon={<GoogleIcon />}
-                            component={Link}
-                            href="/dashboard"
-                            sx={{ mb: 2, py: 1.5, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-                        >
-                            Continue with Google
-                        </Button>
-
-                        <Button
-                            variant="contained"
-                            size="large"
-                            fullWidth
-                            startIcon={<PersonIcon />}
-                            component={Link}
-                            href="/dashboard"
-                            sx={{
-                                py: 1.5,
-                                bgcolor: '#165B33',
-                                '&:hover': { bgcolor: '#124a2a' }
-                            }}
-                        >
-                            Continue as Guest
-                        </Button>
+                        <GoogleLoginButton />
 
                         <Box sx={{ mt: 4 }}>
                             <Link href="/santa/login" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none', fontSize: '0.8rem' }}>

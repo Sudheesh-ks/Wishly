@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Typography, Box, AppBar, Toolbar, IconButton, Chip, Tabs, Tab, TextField, Button, Grid, Paper } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -8,10 +8,11 @@ import Link from 'next/link';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Snowfall from '@/components/Snowfall';
 import { useGift } from '@/context/GiftContext';
+import { fetchLetters, Letter } from '@/services/letterService';
 
 // --- Letters Tab Data ---
 const LETTER_COLUMNS: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
+    { field: '_id', headerName: 'ID', width: 220 },
     { field: 'childName', headerName: 'Child Name', width: 200 },
     { field: 'location', headerName: 'Location', width: 150 },
     { field: 'wishList', headerName: 'Wish List', width: 300 },
@@ -27,17 +28,9 @@ const LETTER_COLUMNS: GridColDef[] = [
     { field: 'action', headerName: 'Action', width: 150, renderCell: () => <Box sx={{ color: '#F8B229', cursor: 'pointer' }}>Review</Box> }
 ];
 
-const LETTER_ROWS = [
-    { id: 1, childName: 'Timmy', location: 'New York', wishList: 'Toy Train, Puppy', status: 'Nice' },
-    { id: 2, childName: 'Sally', location: 'London', wishList: 'Dollhouse', status: 'Nice' },
-    { id: 3, childName: 'Billy', location: 'Chicago', wishList: 'Coal', status: 'Naughty' },
-    { id: 4, childName: 'Alice', location: 'Paris', wishList: 'Art Set', status: 'Sorting' },
-    { id: 5, childName: 'John', location: 'Sydney', wishList: 'Surfboard', status: 'Nice' },
-];
-
 // --- Inventory Tab Data ---
 const INVENTORY_COLUMNS: GridColDef[] = [
-    { field: 'id', headerName: 'Gift ID', width: 120 },
+    { field: '_id', headerName: 'Gift ID', width: 220 },
     {
         field: 'image',
         headerName: 'Image',
@@ -45,13 +38,26 @@ const INVENTORY_COLUMNS: GridColDef[] = [
         renderCell: (params) => <Box component="img" src={params.value} sx={{ width: 50, height: 50, borderRadius: 1, objectFit: 'cover' }} />
     },
     { field: 'title', headerName: 'Gift Title', width: 250 },
-    { field: 'stock', headerName: 'Stock (Est)', width: 150, renderCell: () => Math.floor(Math.random() * 1000) }, // Mock stock
+    { field: 'stock', headerName: 'Stock (Est)', width: 150, renderCell: (params) => params.row.stock ?? Math.floor(Math.random() * 1000) },
 ];
 
 
 export default function SantaDashboard() {
     const [tabValue, setTabValue] = useState(0);
     const { gifts, addGift } = useGift();
+    const [letters, setLetters] = useState<Letter[]>([]);
+
+    useEffect(() => {
+        const loadLetters = async () => {
+            try {
+                const data = await fetchLetters();
+                setLetters(data);
+            } catch (error) {
+                console.error('Error loading letters:', error);
+            }
+        };
+        loadLetters();
+    }, []);
 
     // Form State
     const [newTitle, setNewTitle] = useState('');
@@ -61,9 +67,9 @@ export default function SantaDashboard() {
         setTabValue(newValue);
     };
 
-    const handleAddGift = () => {
+    const handleAddGift = async () => {
         if (newTitle && newImage) {
-            addGift({ title: newTitle, image: newImage });
+            await addGift({ title: newTitle, image: newImage });
             setNewTitle('');
             setNewImage('');
             alert('Gift added to workshop!');
@@ -81,7 +87,7 @@ export default function SantaDashboard() {
                         Santa's Command Center
                     </Typography>
 
-                    <IconButton component={Link} href="/" sx={{ color: 'white' }}>
+                    <IconButton onClick={() => { localStorage.removeItem('token'); window.location.href = '/santa/login'; }} sx={{ color: 'white' }}>
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
@@ -102,7 +108,8 @@ export default function SantaDashboard() {
                         </Typography>
                         <Box sx={{ height: 500, width: '100%', bgcolor: 'rgba(0,0,0,0.5)', borderRadius: 2, backdropFilter: 'blur(10px)', p: 2 }}>
                             <DataGrid
-                                rows={LETTER_ROWS}
+                                getRowId={(row) => row._id || Math.random()}
+                                rows={letters}
                                 columns={LETTER_COLUMNS}
                                 initialState={{ pagination: { paginationModel: { page: 0, pageSize: 5 } } }}
                                 pageSizeOptions={[5, 10]}
@@ -161,6 +168,7 @@ export default function SantaDashboard() {
                             <Grid size={{ xs: 12, md: 8 }}>
                                 <Box sx={{ height: 500, width: '100%', bgcolor: 'rgba(0,0,0,0.5)', borderRadius: 2, backdropFilter: 'blur(10px)', p: 2 }}>
                                     <DataGrid
+                                        getRowId={(row) => row._id || Math.random()}
                                         rows={gifts}
                                         columns={INVENTORY_COLUMNS}
                                         initialState={{ pagination: { paginationModel: { page: 0, pageSize: 5 } } }}

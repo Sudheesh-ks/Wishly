@@ -6,6 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@/theme';
 import { SoundProvider } from '@/components/SoundManager';
 import { GiftProvider } from '@/context/GiftContext';
+import { LetterProvider } from '@/context/LetterContext';
 import './globals.css';
 
 const inter = Inter({
@@ -38,9 +39,11 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <GiftProvider>
-              <SoundProvider>
-                {children}
-              </SoundProvider>
+              <LetterProvider>
+                <SoundProvider>
+                  {children}
+                </SoundProvider>
+              </LetterProvider>
             </GiftProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>

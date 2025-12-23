@@ -1,24 +1,52 @@
 'use client';
 import { useState } from 'react';
-import { Paper, TextField, Box, Button, Typography } from '@mui/material';
+import { Paper, TextField, Box, Button, Typography, Alert, Snackbar } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import SendIcon from '@mui/icons-material/Send';
+import { createLetter } from '@/services/letterService';
+import { useLetter } from '@/context/LetterContext';
 
 const LetterEditor = () => {
+    const { draftText: text, setDraftText: setText } = useLetter();
     const [isSealed, setIsSealed] = useState(false);
-    const [text, setText] = useState('');
+    const [childName, setChildName] = useState('');
+    const [location, setLocation] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
 
-    const handleSeal = () => {
-        setIsSealed(true);
-        // Reset after animation for demo purposes
-        setTimeout(() => {
-            setIsSealed(false);
-            setText('');
-        }, 4000);
+    const handleSeal = async () => {
+        if (!childName || !location || !text) {
+            setError('Please fill in your name, location and your wish!');
+            return;
+        }
+
+        try {
+            await createLetter({
+                childName,
+                location,
+                wishList: text,
+                content: text
+            });
+
+            setIsSealed(true);
+            setSuccess(true);
+
+            // Reset after animation
+            setTimeout(() => {
+                setIsSealed(false);
+                setText('');
+                setChildName('');
+                setLocation('');
+                setSuccess(false);
+            }, 6000);
+        } catch (err) {
+            console.error(err);
+            setError('Santa is busy! Please try sending your letter again later.');
+        }
     };
 
     return (
-        <Box sx={{ position: 'relative', height: 500, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Box sx={{ position: 'relative', minHeight: 600, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
             <AnimatePresence>
                 {!isSealed ? (
                     <Box
@@ -37,7 +65,7 @@ const LetterEditor = () => {
                                 background: 'linear-gradient(to bottom right, #f9f1e0, #e8d7b3)',
                                 color: '#4e342e',
                                 fontFamily: 'var(--font-inter)',
-                                minHeight: 400,
+                                minHeight: 450,
                                 position: 'relative',
                                 borderRadius: '4px',
                             }}
@@ -45,9 +73,29 @@ const LetterEditor = () => {
                             <Typography variant="h4" sx={{ mb: 2, fontFamily: 'var(--font-mountains)', color: '#D42426', textAlign: 'center' }}>
                                 Dear Santa...
                             </Typography>
+
+                            <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
+                                <TextField
+                                    label="My Name"
+                                    variant="standard"
+                                    value={childName}
+                                    onChange={(e) => setChildName(e.target.value)}
+                                    placeholder="Your Name"
+                                    sx={{ flex: 1 }}
+                                />
+                                <TextField
+                                    label="Where I live"
+                                    variant="standard"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    placeholder="Your Location"
+                                    sx={{ flex: 1 }}
+                                />
+                            </Box>
+
                             <TextField
                                 multiline
-                                rows={10}
+                                rows={8}
                                 fullWidth
                                 variant="standard"
                                 value={text}
@@ -66,7 +114,7 @@ const LetterEditor = () => {
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                                 <Button
                                     variant="contained"
-                                    color="error" // Red
+                                    color="error"
                                     onClick={handleSeal}
                                     endIcon={<SendIcon />}
                                     sx={{
@@ -77,7 +125,7 @@ const LetterEditor = () => {
                                         px: 4,
                                     }}
                                 >
-                                    Seal with Wax
+                                    Seal & Send to North Pole
                                 </Button>
                             </Box>
                         </Paper>
@@ -96,7 +144,6 @@ const LetterEditor = () => {
                         transition={{ duration: 2.5, times: [0, 0.2, 0.6, 1] }}
                         sx={{ position: 'absolute', zIndex: 5 }}
                     >
-                        {/* Visual representation of an envelope */}
                         <Paper
                             elevation={6}
                             sx={{
@@ -124,6 +171,18 @@ const LetterEditor = () => {
                     </Box>
                 )}
             </AnimatePresence>
+
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
+                <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={success && !isSealed} autoHideDuration={6000} onClose={() => setSuccess(false)}>
+                <Alert onClose={() => setSuccess(false)} severity="success" sx={{ width: '100%' }}>
+                    Your letter has been sent to Santa! 🎅
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

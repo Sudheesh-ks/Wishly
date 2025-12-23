@@ -1,12 +1,26 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container, Box, Typography, Button, Paper, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
 import KeyIcon from '@mui/icons-material/Key';
-import Link from 'next/link';
 import Snowfall from '@/components/Snowfall';
 
 export default function SantaLoginPage() {
+    const router = useRouter();
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleLogin = () => {
+        if (password === 'santa123') {
+            localStorage.setItem('token', 'santa-token'); // Mock token for santa
+            router.push('/santa/dashboard');
+        } else {
+            setError('The elves don\'t recognize that password!');
+        }
+    };
+
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             <Snowfall />
@@ -42,8 +56,11 @@ export default function SantaLoginPage() {
                             type="password"
                             placeholder="Secret Password"
                             fullWidth
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                             sx={{
-                                mb: 4,
+                                mb: 2,
                                 '& .MuiInputBase-input': { color: 'white' },
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
@@ -52,13 +69,18 @@ export default function SantaLoginPage() {
                             }}
                         />
 
+                        {error && (
+                            <Typography variant="caption" sx={{ color: '#D42426', mb: 2 }}>
+                                {error}
+                            </Typography>
+                        )}
+
                         <Button
                             variant="contained"
                             size="large"
                             fullWidth
                             startIcon={<KeyIcon />}
-                            component={Link}
-                            href="/santa/dashboard"
+                            onClick={handleLogin}
                             sx={{
                                 py: 1.5,
                                 bgcolor: '#D42426',
