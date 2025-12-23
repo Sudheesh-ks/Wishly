@@ -20,8 +20,12 @@ passport.use(
                     user = await User.create({
                         googleId: profile.id,
                         email: profile.emails?.[0].value,
+                        name: profile.displayName,
                         role: 'user', // Default role
                     });
+                } else if (!user.name) {
+                    user.name = profile.displayName;
+                    await user.save();
                 }
 
                 return done(null, user);

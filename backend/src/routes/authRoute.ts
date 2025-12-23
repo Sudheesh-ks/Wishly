@@ -2,6 +2,8 @@ import express from 'express';
 import passport from 'passport';
 import dotenv from 'dotenv';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.util';
+import { authenticate, AuthRequest } from '../middlewares/authMiddleware';
+import User from '../models/User';
 
 dotenv.config();
 
@@ -40,5 +42,17 @@ authRouter.get(
     res.redirect(`${process.env.GOOGLE_REDIRECT_URL}?token=${accessToken}`);
   }
 );
+
+authRouter.get('/me', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const user = await User.findById(req.user?.id).select('-googleId');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default authRouter;

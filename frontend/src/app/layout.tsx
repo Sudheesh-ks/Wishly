@@ -7,6 +7,7 @@ import theme from '@/theme';
 import { SoundProvider } from '@/components/SoundManager';
 import { GiftProvider } from '@/context/GiftContext';
 import { LetterProvider } from '@/context/LetterContext';
+import { AuthProvider } from '@/context/AuthContext';
 import './globals.css';
 
 const inter = Inter({
@@ -38,13 +39,15 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <GiftProvider>
-              <LetterProvider>
-                <SoundProvider>
-                  {children}
-                </SoundProvider>
-              </LetterProvider>
-            </GiftProvider>
+            <AuthProvider>
+              <GiftProvider>
+                <LetterProvider>
+                  <SoundProvider>
+                    {children}
+                  </SoundProvider>
+                </LetterProvider>
+              </GiftProvider>
+            </AuthProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

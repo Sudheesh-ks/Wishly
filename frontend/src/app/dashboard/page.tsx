@@ -11,11 +11,15 @@ import LetterEditor from '@/components/LetterEditor';
 import { useSoundManager } from '@/components/SoundManager';
 import { useGift } from '@/context/GiftContext';
 import { useLetter } from '@/context/LetterContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DashboardPage() {
     const { isPlaying, toggleMusic } = useSoundManager();
     const { gifts } = useGift();
     const { appendGift } = useLetter();
+    const { user, logout } = useAuth();
+
+    console.log(user)
 
     const handleAddToLetter = (giftName: string) => {
         appendGift(giftName);
@@ -39,7 +43,7 @@ export default function DashboardPage() {
                         {isPlaying ? <MusicNoteIcon /> : <MusicOffIcon />}
                     </IconButton>
 
-                    <IconButton onClick={() => { localStorage.removeItem('token'); window.location.href = '/login'; }} sx={{ color: 'white' }}>
+                    <IconButton onClick={logout} sx={{ color: 'white' }}>
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
@@ -47,7 +51,7 @@ export default function DashboardPage() {
 
             <Container maxWidth="lg" sx={{ py: 4 }}>
                 <Typography variant="h3" sx={{ textAlign: 'center', mb: 2, color: 'white', fontFamily: 'var(--font-mountains)' }}>
-                    Welcome, Guest!
+                    Welcome, {user?.name || user?.email?.split('@')[0] || 'Guest'}!
                 </Typography>
                 <Typography variant="body1" sx={{ textAlign: 'center', mb: 8, color: 'rgba(255,255,255,0.7)' }}>
                     Start adding gifts to your letter or write a custom wish.
