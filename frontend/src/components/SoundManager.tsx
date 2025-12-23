@@ -4,9 +4,7 @@ import useSound from 'use-sound';
 
 // Note: Using placeholders for sounds. User should replace these URLs.
 const SOUND_URLS = {
-    backgroundLoop: 'https://assets.mixkit.co/music/preview/mixkit-christmas-magic-2895.mp3', // Example placeholder
-    jingle: 'https://assets.mixkit.co/sfx/preview/mixkit-christmas-sleigh-bells-jingle-1447.mp3',
-    poof: 'https://assets.mixkit.co/sfx/preview/mixkit-magic-wand-sparkle-3067.mp3'
+    backgroundLoop: '/music/christmas-bg.mp3',
 };
 
 interface SoundContextType {
@@ -28,20 +26,24 @@ export const useSoundManager = () => useContext(SoundContext);
 export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     const [isPlaying, setIsPlaying] = useState(false);
 
-    const [playBg, { stop: stopBg }] = useSound(SOUND_URLS.backgroundLoop, {
+    const [playBg, { stop: stopBg, sound }] = useSound(SOUND_URLS.backgroundLoop, {
         loop: true,
         volume: 0.3,
-        onload: () => console.log('Music loaded')
+        format: ['mp3'],
+        onload: () => console.log('Music loaded successfully'),
+        onloaderror: (id: any, err: any) => console.error('Music load error:', err)
     });
 
-    const [playJingle] = useSound(SOUND_URLS.jingle, { volume: 0.5 });
-    const [playPoof] = useSound(SOUND_URLS.poof, { volume: 0.5 });
+    // const [playJingle] = useSound(SOUND_URLS.jingle, { volume: 0.5 });
+    // const [playPoof] = useSound(SOUND_URLS.poof, { volume: 0.5 });
 
     const toggleMusic = useCallback(() => {
         if (isPlaying) {
             stopBg();
+            console.log('Music stopped');
         } else {
             playBg();
+            console.log('Music started');
         }
         setIsPlaying(!isPlaying);
     }, [isPlaying, playBg, stopBg]);
@@ -50,7 +52,7 @@ export const SoundProvider = ({ children }: { children: React.ReactNode }) => {
     // We'll rely on user toggle.
 
     return (
-        <SoundContext.Provider value={{ isPlaying, toggleMusic, playJingle, playPoof }}>
+        <SoundContext.Provider value={{ isPlaying, toggleMusic }}>
             {children}
         </SoundContext.Provider>
     );
