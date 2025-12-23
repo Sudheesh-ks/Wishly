@@ -21,8 +21,8 @@ export default function DashboardPage() {
 
     console.log(user)
 
-    const handleAddToLetter = (giftName: string) => {
-        appendGift(giftName);
+    const handleAddToLetter = (gift: any) => {
+        appendGift(gift);
         // Scroll to editor
         const editor = document.getElementById('letter-editor');
         if (editor) editor.scrollIntoView({ behavior: 'smooth' });
@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
                 {/* Gift Gallery */}
                 <Typography variant="h4" sx={{ mb: 4, color: '#F8B229' }}>
-                    Gift Ideas
+                    Gift Gallery
                 </Typography>
                 <Grid container spacing={4} justifyContent="center" sx={{ mb: 12 }}>
                     {gifts.map((gift) => (
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                             <GiftCard
                                 title={gift.title}
                                 image={gift.image}
-                                onAdd={() => handleAddToLetter(gift.title)}
+                                onAdd={() => handleAddToLetter(gift)}
                             />
                         </Grid>
                     ))}

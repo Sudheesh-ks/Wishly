@@ -7,7 +7,7 @@ import { createLetter } from '@/services/letterService';
 import { useLetter } from '@/context/LetterContext';
 
 const LetterEditor = () => {
-    const { draftText: text, setDraftText: setText } = useLetter();
+    const { draftText: text, setDraftText: setText, selectedGift, setSelectedGift } = useLetter();
     const [isSealed, setIsSealed] = useState(false);
     const [childName, setChildName] = useState('');
     const [location, setLocation] = useState('');
@@ -25,7 +25,8 @@ const LetterEditor = () => {
                 childName,
                 location,
                 wishList: text,
-                content: text
+                content: text,
+                giftId: selectedGift?._id || undefined
             });
 
             setIsSealed(true);
@@ -37,6 +38,7 @@ const LetterEditor = () => {
                 setText('');
                 setChildName('');
                 setLocation('');
+                setSelectedGift(null);
                 setSuccess(false);
             }, 6000);
         } catch (err) {
@@ -73,6 +75,27 @@ const LetterEditor = () => {
                             <Typography variant="h4" sx={{ mb: 2, fontFamily: 'var(--font-mountains)', color: '#D42426', textAlign: 'center' }}>
                                 Dear Santa...
                             </Typography>
+
+                            {/* Gift Preview Attachment */}
+                            {selectedGift && (
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    mb: 3,
+                                    p: 1,
+                                    bgcolor: 'rgba(212, 36, 38, 0.05)',
+                                    borderRadius: 2,
+                                    border: '1px dashed #D42426',
+                                    width: 'fit-content',
+                                    mx: 'auto'
+                                }}>
+                                    <Box
+                                        component="img"
+                                        src={selectedGift.image}
+                                        sx={{ width: 80, height: 80, borderRadius: 1.5, objectFit: 'cover', boxShadow: 3 }}
+                                    />
+                                </Box>
+                            )}
 
                             <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
                                 <TextField

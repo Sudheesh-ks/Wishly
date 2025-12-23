@@ -6,18 +6,25 @@ import { Container, Box, Typography, Button, Paper, TextField } from '@mui/mater
 import { motion } from 'framer-motion';
 import KeyIcon from '@mui/icons-material/Key';
 import Snowfall from '@/components/Snowfall';
+import axios from 'axios';
 
 export default function SantaLoginPage() {
     const router = useRouter();
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleLogin = () => {
-        if (password === 'santa123') {
-            localStorage.setItem('token', 'santa-token'); // Mock token for santa
-            router.push('/santa/dashboard');
-        } else {
-            setError('The elves don\'t recognize that password!');
+    const handleLogin = async () => {
+        try {
+            setError('');
+            const response = await axios.post('http://localhost:5000/auth/santa/login', { password });
+
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                router.push('/santa/dashboard');
+            }
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.response?.data?.message || 'The elves are busy, try again later!');
         }
     };
 

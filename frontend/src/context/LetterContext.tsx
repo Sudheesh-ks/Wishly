@@ -2,23 +2,28 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
+import { Gift } from '../services/giftService';
+
 interface LetterContextType {
     draftText: string;
     setDraftText: (text: string) => void;
-    appendGift: (giftName: string) => void;
+    appendGift: (gift: Gift) => void;
+    selectedGift: Gift | null;
+    setSelectedGift: (gift: Gift | null) => void;
 }
 
 const LetterContext = createContext<LetterContextType | undefined>(undefined);
 
 export function LetterProvider({ children }: { children: ReactNode }) {
     const [draftText, setDraftText] = useState('');
+    const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
 
-    const appendGift = (giftName: string) => {
-        setDraftText((prev) => prev + (prev ? ', ' : '') + giftName);
+    const appendGift = (gift: Gift) => {
+        setSelectedGift(gift);
     };
 
     return (
-        <LetterContext.Provider value={{ draftText, setDraftText, appendGift }}>
+        <LetterContext.Provider value={{ draftText, setDraftText, appendGift, selectedGift, setSelectedGift }}>
             {children}
         </LetterContext.Provider>
     );

@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt.util';
 import { authenticate, AuthRequest } from '../middlewares/authMiddleware';
 import User from '../models/User';
+import Admin from '../models/Admin';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -52,6 +54,27 @@ authRouter.get('/me', authenticate, async (req: AuthRequest, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+authRouter.post('/santa/login', async (req, res) => {
+  const { password } = req.body;
+
+  try {
+    const admin = await Admin.findOne();
+    if (!admin) {
+      return res.status(404).json({ message: 'Santa not found in database!' });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'The elves don\'t recognize that password!' });
+    }
+
+    const accessToken = generateAccessToken((admin._id as any).toString(), 'santa@northpole.com', 'santa');
+    res.json({ token: accessToken });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during Santa login' });
   }
 });
 
