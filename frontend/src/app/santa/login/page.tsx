@@ -1,25 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Box, Typography, Button, Paper, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
 import KeyIcon from '@mui/icons-material/Key';
 import Snowfall from '@/components/Snowfall';
 import axios from 'axios';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SantaLoginPage() {
     const router = useRouter();
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const { santa, loading, refreshSanta } = useAuth();
+
+    useEffect(() => {
+        if (!loading && santa) {
+            router.replace('/santa/dashboard');
+        }
+    }, [santa, loading, router]);
 
     const handleLogin = async () => {
         try {
             setError('');
-            const response = await axios.post('http://localhost:5000/auth/santa/login', { password });
+            const response = await axios.post('http://localhost:5000/auth/santa/login', { password }, { withCredentials: true });
 
             if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('wishly_santa_token', response.data.token);
+                await refreshSanta();
                 router.push('/santa/dashboard');
             }
         } catch (err: any) {
@@ -27,6 +36,18 @@ export default function SantaLoginPage() {
             setError(err.response?.data?.message || 'The elves are busy, try again later!');
         }
     };
+
+    if (loading) {
+        return (
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'white' }}>Loading...</Typography>
+            </Box>
+        );
+    }
+
+    if (santa) {
+        return null; // Will redirect
+    }
 
     return (
         <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>

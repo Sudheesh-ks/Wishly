@@ -17,7 +17,7 @@ export interface Letter {
     popularity?: number;
 }
 
-export const fetchLetters = async (params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }) => {
+export const fetchLetters = async (params?: { page?: number; limit?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; status?: string }) => {
     const response = await api.get('/letters', { params });
     return response.data;
 };

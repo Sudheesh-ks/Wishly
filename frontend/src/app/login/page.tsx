@@ -5,13 +5,35 @@ import { motion } from 'framer-motion';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Snowfall from '@/components/Snowfall';
 import GoogleLoginButton from '@/components/GoogleLoginButton';
 import { useSoundManager } from '@/components/SoundManager';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
-
     const { isPlaying, toggleMusic } = useSoundManager();
+    const { user, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.replace('/dashboard');
+        }
+    }, [user, loading, router]);
+
+    if (loading) {
+        return (
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'white' }}>Loading...</Typography>
+            </Box>
+        );
+    }
+
+    if (user) {
+        return null; // Will redirect
+    }
 
     return (
         <Box sx={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>

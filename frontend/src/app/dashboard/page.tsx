@@ -5,6 +5,8 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Snowfall from '@/components/Snowfall';
 import GiftCard from '@/components/GiftCard';
 import LetterEditor from '@/components/LetterEditor';
@@ -17,9 +19,14 @@ export default function DashboardPage() {
     const { isPlaying, toggleMusic } = useSoundManager();
     const { gifts } = useGift();
     const { appendGift } = useLetter();
-    const { user, logout } = useAuth();
+    const { user, loading, logoutUser } = useAuth();
+    const router = useRouter();
 
-    console.log(user)
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace('/login');
+        }
+    }, [user, loading, router]);
 
     const handleAddToLetter = (gift: any) => {
         appendGift(gift);
@@ -27,6 +34,18 @@ export default function DashboardPage() {
         const editor = document.getElementById('letter-editor');
         if (editor) editor.scrollIntoView({ behavior: 'smooth' });
     };
+
+    if (loading) {
+        return (
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'white' }}>Loading...</Typography>
+            </Box>
+        );
+    }
+
+    if (!user) {
+        return null; // Will redirect
+    }
 
     return (
         <Box sx={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh' }}>
@@ -43,7 +62,7 @@ export default function DashboardPage() {
                         {isPlaying ? <MusicNoteIcon /> : <MusicOffIcon />}
                     </IconButton>
 
-                    <IconButton onClick={logout} sx={{ color: 'white' }}>
+                    <IconButton onClick={logoutUser} sx={{ color: 'white' }}>
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
@@ -67,6 +86,7 @@ export default function DashboardPage() {
                             <GiftCard
                                 title={gift.title}
                                 image={gift.image}
+                                stock={gift.stock}
                                 onAdd={() => handleAddToLetter(gift)}
                             />
                         </Grid>

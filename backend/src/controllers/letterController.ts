@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import Letter from '../models/Letter';
+import Gift from '../models/Gift';
 import mongoose from 'mongoose';
+import { analyzeLetterContent } from '../services/aiService';
 
 export const getLetters = async (req: Request, res: Response) => {
     try {
@@ -9,6 +11,7 @@ export const getLetters = async (req: Request, res: Response) => {
         const search = (req.query.search as string) || '';
         const sortBy = (req.query.sortBy as string) || 'createdAt';
         const sortOrder = (req.query.sortOrder as string) === 'asc' ? 1 : -1;
+        const status = (req.query.status as string) || '';
 
         const skip = (page - 1) * limit;
 
@@ -39,7 +42,10 @@ export const getLetters = async (req: Request, res: Response) => {
                 }
             },
             {
-                $match: {
+                $match: status ? {
+                    childName: { $regex: search, $options: 'i' },
+                    status: status
+                } : {
                     childName: { $regex: search, $options: 'i' }
                 }
             }
@@ -98,16 +104,33 @@ export const getLetters = async (req: Request, res: Response) => {
 export const createLetter = async (req: Request, res: Response) => {
     try {
         const { childName, location, wishList, content, giftId } = req.body;
+
+        // Stock handling
+        if (giftId && mongoose.isValidObjectId(giftId)) {
+            const gift = await Gift.findById(giftId);
+            if (!gift) return res.status(404).json({ message: 'Gift not found' });
+            if (gift.stock <= 0) return res.status(400).json({ message: 'Gift is out of stock' });
+
+            // Decrement stock
+            gift.stock -= 1;
+            await gift.save();
+        }
+
+        // AI Analysis
+        const status = await analyzeLetterContent(content || wishList.join(", "));
+
         const newLetter = new Letter({
             childName,
             location,
             wishList,
             content,
+            status,
             giftId: (giftId && mongoose.isValidObjectId(giftId)) ? new mongoose.Types.ObjectId(giftId) : undefined
         });
         await newLetter.save();
         res.status(201).json(newLetter);
     } catch (error) {
+        console.error('Error creating letter:', error);
         res.status(500).json({ message: 'Error creating letter', error });
     }
 };

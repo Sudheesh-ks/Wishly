@@ -1,14 +1,15 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import './config/passport'; // Initialize passport
 import { connectDB } from './config/mongodb';
 import authRouter from './routes/authRoute';
 import giftRouter from './routes/giftRoute';
 import letterRouter from './routes/letterRoute';
 import passport from 'passport';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,7 @@ connectDB();
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(passport.initialize());
 

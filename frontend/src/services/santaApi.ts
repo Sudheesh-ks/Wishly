@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-const api = axios.create({
+const santaApi = axios.create({
     baseURL: 'http://localhost:5000/api',
     withCredentials: true,
 });
 
-// Request interceptor to add user token
-api.interceptors.request.use(
+// Request interceptor to add santa token
+santaApi.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('wishly_user_token');
+        const token = localStorage.getItem('wishly_santa_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -20,7 +20,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor to handle 401 errors and refresh token
-api.interceptors.response.use(
+santaApi.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
@@ -31,14 +31,14 @@ api.interceptors.response.use(
             try {
                 const response = await axios.post('http://localhost:5000/auth/refresh', {}, { withCredentials: true });
 
-                if (response.data.role === 'user' && response.data.token) {
-                    localStorage.setItem('wishly_user_token', response.data.token);
+                if (response.data.role === 'santa' && response.data.token) {
+                    localStorage.setItem('wishly_santa_token', response.data.token);
                     originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
-                    return api(originalRequest);
+                    return santaApi(originalRequest);
                 }
             } catch (refreshError) {
-                localStorage.removeItem('wishly_user_token');
-                window.location.href = '/login';
+                localStorage.removeItem('wishly_santa_token');
+                window.location.href = '/santa/login';
                 return Promise.reject(refreshError);
             }
         }
@@ -47,4 +47,4 @@ api.interceptors.response.use(
     }
 );
 
-export default api;
+export default santaApi;

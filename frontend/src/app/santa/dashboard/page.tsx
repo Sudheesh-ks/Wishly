@@ -1,18 +1,37 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Container, Typography, Box, AppBar, Toolbar, IconButton, Chip, Tabs, Tab, TextField, Button, Grid, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Snowfall from '@/components/Snowfall';
 import { useGift } from '@/context/GiftContext';
-import { fetchLetters, Letter, updateLetterPackedStatus, updateLetterStatus } from '@/services/letterService';
+import { useAuth } from '@/context/AuthContext';
+import santaApi from '@/services/santaApi';
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 import Checkbox from '@mui/material/Checkbox';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
+
+interface Letter {
+    _id?: string;
+    childName: string;
+    location: string;
+    wishList?: string;
+    gift?: {
+        _id: string;
+        title: string;
+        image: string;
+    };
+    giftId?: string;
+    status: 'Nice' | 'Naughty' | 'Sorting';
+    isPacked: boolean;
+    content?: string;
+    popularity?: number;
+}
 
 // --- Letters Tab Data ---
 const LETTER_COLUMNS = (
@@ -88,25 +107,49 @@ const LETTER_COLUMNS = (
     ];
 
 // --- Inventory Tab Data ---
-const INVENTORY_COLUMNS: GridColDef[] = [
-    { field: '_id', headerName: 'Gift ID', width: 220 },
-    {
-        field: 'image',
-        headerName: 'Image',
-        width: 100,
-        renderCell: (params) => <Box component="img" src={params.value} sx={{ width: 50, height: 50, borderRadius: 1, objectFit: 'cover' }} />
-    },
-    { field: 'title', headerName: 'Gift Title', width: 250 },
-    { field: 'stock', headerName: 'Stock (Est)', width: 150, renderCell: (params) => params.row.stock ?? Math.floor(Math.random() * 1000) },
-];
+const getInventoryColumns = (
+    handleUpdateStock: (id: string, currentStock: number) => void
+): GridColDef[] => [
+        { field: '_id', headerName: 'Gift ID', width: 220 },
+        {
+            field: 'image',
+            headerName: 'Image',
+            width: 100,
+            renderCell: (params) => <Box component="img" src={params.value} sx={{ width: 50, height: 50, borderRadius: 1, objectFit: 'cover' }} />
+        },
+        { field: 'title', headerName: 'Gift Title', width: 250 },
+        { field: 'stock', headerName: 'Stock', width: 120, renderCell: (params) => params.value ?? 0 },
+        {
+            field: 'action',
+            headerName: 'Action',
+            width: 150,
+            renderCell: (params) => (
+                <Button
+                    size="small"
+                    onClick={() => handleUpdateStock(params.row._id, params.row.stock || 0)}
+                    sx={{ color: '#F8B229', textTransform: 'none' }}
+                >
+                    Update Stock
+                </Button>
+            )
+        }
+    ];
 
 
 export default function SantaDashboard() {
     const [tabValue, setTabValue] = useState(0);
     const { gifts, addGift } = useGift();
+    const { santa, loading: authLoading, logoutSanta } = useAuth();
+    const router = useRouter();
     const [letters, setLetters] = useState<Letter[]>([]);
     const [totalLetters, setTotalLetters] = useState(0);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading && !santa) {
+            router.replace('/santa/login');
+        }
+    }, [santa, authLoading, router]);
 
     // DataGrid States
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -114,6 +157,7 @@ export default function SantaDashboard() {
         pageSize: 5,
     });
     const [selectedSort, setSelectedSort] = useState('latest');
+    const [selectedStatus, setSelectedStatus] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
     // Modal State
@@ -122,7 +166,7 @@ export default function SantaDashboard() {
 
     const handlePackedToggle = useCallback(async (id: string, isPacked: boolean) => {
         try {
-            await updateLetterPackedStatus(id, isPacked);
+            await santaApi.patch(`/letters/${id}/packed`, { isPacked });
             setLetters(prev => prev.map(l => l._id === id ? { ...l, isPacked } : l));
         } catch (error) {
             console.error('Error updating packed status:', error);
@@ -131,7 +175,7 @@ export default function SantaDashboard() {
 
     const handleStatusChange = useCallback(async (id: string, status: string) => {
         try {
-            await updateLetterStatus(id, status);
+            await santaApi.patch(`/letters/${id}/status`, { status });
             setLetters(prev => prev.map(l => l._id === id ? { ...l, status: status as any } : l));
         } catch (error) {
             console.error('Error updating status:', error);
@@ -143,9 +187,23 @@ export default function SantaDashboard() {
         setModalOpen(true);
     }, []);
 
+    const { updateGiftStock } = useGift();
+    const handleUpdateStock = useCallback(async (id: string, currentStock: number) => {
+        const newStockStr = prompt('Enter new stock count:', currentStock.toString());
+        if (newStockStr !== null) {
+            const newStockValue = parseInt(newStockStr);
+            if (!isNaN(newStockValue)) {
+                await updateGiftStock(id, newStockValue);
+            }
+        }
+    }, [updateGiftStock]);
+
     const columns = useMemo(() => LETTER_COLUMNS(handleViewLetter, handlePackedToggle, handleStatusChange), [handleViewLetter, handlePackedToggle, handleStatusChange]);
+    const inventoryColumns = useMemo(() => getInventoryColumns(handleUpdateStock), [handleUpdateStock]);
 
     useEffect(() => {
+        if (!santa) return;
+
         let active = true;
         const load = async () => {
             setLoading(true);
@@ -161,17 +219,20 @@ export default function SantaDashboard() {
                     sortOrder = 'asc';
                 }
 
-                const response = await fetchLetters({
-                    page: paginationModel.page + 1,
-                    limit: paginationModel.pageSize,
-                    search: searchQuery,
-                    sortBy,
-                    sortOrder
+                const response = await santaApi.get('/letters', {
+                    params: {
+                        page: paginationModel.page + 1,
+                        limit: paginationModel.pageSize,
+                        search: searchQuery,
+                        sortBy,
+                        sortOrder,
+                        status: selectedStatus
+                    }
                 });
 
                 if (active) {
-                    setLetters(response.letters);
-                    setTotalLetters(response.pagination.total);
+                    setLetters(response.data.letters);
+                    setTotalLetters(response.data.pagination.total);
                 }
             } catch (error) {
                 console.error('Error loading letters:', error);
@@ -182,10 +243,11 @@ export default function SantaDashboard() {
 
         load();
         return () => { active = false; };
-    }, [paginationModel, selectedSort, searchQuery]);
+    }, [paginationModel, selectedSort, searchQuery, selectedStatus, santa]);
 
     const [newTitle, setNewTitle] = useState('');
     const [newImage, setNewImage] = useState('');
+    const [newStock, setNewStock] = useState('0');
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
@@ -193,12 +255,25 @@ export default function SantaDashboard() {
 
     const handleAddGift = async () => {
         if (newTitle && newImage) {
-            await addGift({ title: newTitle, image: newImage });
+            await addGift({ title: newTitle, image: newImage, stock: parseInt(newStock) || 0 });
             setNewTitle('');
             setNewImage('');
+            setNewStock('0');
             alert('Gift added to workshop!');
         }
     };
+
+    if (authLoading) {
+        return (
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="h5" sx={{ color: 'white' }}>Loading...</Typography>
+            </Box>
+        );
+    }
+
+    if (!santa) {
+        return null; // Will redirect
+    }
 
     return (
         <Box sx={{ position: 'relative', overflowX: 'hidden', minHeight: '100vh', scrollbarWidth: 'none' }}>
@@ -210,7 +285,7 @@ export default function SantaDashboard() {
                         Santa's Command Center
                     </Typography>
 
-                    <IconButton onClick={() => { localStorage.removeItem('token'); window.location.href = '/santa/login'; }} sx={{ color: 'white' }}>
+                    <IconButton onClick={logoutSanta} sx={{ color: 'white' }}>
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
@@ -229,7 +304,7 @@ export default function SantaDashboard() {
                                 Incoming Letters
                             </Typography>
 
-                            <FormControl size="small" sx={{ width: 200, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
+                            <FormControl size="small" sx={{ width: 160, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
                                 <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Sort By</InputLabel>
                                 <Select
                                     value={selectedSort}
@@ -240,6 +315,21 @@ export default function SantaDashboard() {
                                     <MenuItem value="top">Top Requested</MenuItem>
                                     <MenuItem value="latest">Latest First</MenuItem>
                                     <MenuItem value="oldest">Oldest First</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            <FormControl size="small" sx={{ width: 160, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
+                                <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Filter Status</InputLabel>
+                                <Select
+                                    value={selectedStatus}
+                                    label="Filter Status"
+                                    onChange={(e) => setSelectedStatus(e.target.value)}
+                                    sx={{ color: 'white', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
+                                >
+                                    <MenuItem value="">All Statuses</MenuItem>
+                                    <MenuItem value="Nice">✨ Nice</MenuItem>
+                                    <MenuItem value="Naughty">👹 Naughty</MenuItem>
+                                    <MenuItem value="Sorting">⏳ Sorting</MenuItem>
                                 </Select>
                             </FormControl>
 
@@ -313,6 +403,15 @@ export default function SantaDashboard() {
                                         placeholder="https://..."
                                         sx={{ mb: 3, '& .MuiInputBase-input': { color: 'white' }, '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' }, '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' } }}
                                     />
+                                    <TextField
+                                        fullWidth
+                                        label="Initial Stock"
+                                        type="number"
+                                        variant="outlined"
+                                        value={newStock}
+                                        onChange={(e) => setNewStock(e.target.value)}
+                                        sx={{ mb: 3, '& .MuiInputBase-input': { color: 'white' }, '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' }, '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' } }}
+                                    />
                                     <Button
                                         variant="contained"
                                         fullWidth
@@ -330,7 +429,7 @@ export default function SantaDashboard() {
                                     <DataGrid
                                         getRowId={(row) => row._id || Math.random()}
                                         rows={gifts}
-                                        columns={INVENTORY_COLUMNS}
+                                        columns={inventoryColumns}
                                         initialState={{ pagination: { paginationModel: { page: 0, pageSize: 5 } } }}
                                         pageSizeOptions={[5, 10]}
                                         sx={{

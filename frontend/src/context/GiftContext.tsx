@@ -1,11 +1,12 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { fetchGifts, createGift, Gift } from '../services/giftService';
+import { fetchGifts, createGift, updateGift, Gift } from '../services/giftService';
 
 interface GiftContextType {
     gifts: Gift[];
     addGift: (gift: Omit<Gift, '_id'>) => Promise<void>;
+    updateGiftStock: (id: string, stock: number) => Promise<void>;
 }
 
 const GiftContext = createContext<GiftContextType | undefined>(undefined);
@@ -35,8 +36,17 @@ export function GiftProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const updateGiftStockHandler = async (id: string, stock: number) => {
+        try {
+            const updated = await updateGift(id, { stock });
+            setGifts((prev) => prev.map(g => g._id === id ? updated : g));
+        } catch (error) {
+            console.error("Failed to update gift stock", error);
+        }
+    };
+
     return (
-        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler }}>
+        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler, updateGiftStock: updateGiftStockHandler }}>
             {children}
         </GiftContext.Provider>
     );
