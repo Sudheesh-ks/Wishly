@@ -105,6 +105,16 @@ const LetterEditor = () => {
                                     onChange={(e) => setChildName(e.target.value)}
                                     placeholder="Your Name"
                                     sx={{ flex: 1 }}
+                                    InputProps={{
+                                        sx: {
+                                            color: '#000',
+                                        },
+                                    }}
+                                    InputLabelProps={{
+                                        sx: {
+                                            color: '#5d4037',
+                                        },
+                                    }}
                                 />
                                 <TextField
                                     label="Where I live"
@@ -113,6 +123,16 @@ const LetterEditor = () => {
                                     onChange={(e) => setLocation(e.target.value)}
                                     placeholder="Your Location"
                                     sx={{ flex: 1 }}
+                                    InputProps={{
+                                        sx: {
+                                            color: '#000',
+                                        },
+                                    }}
+                                    InputLabelProps={{
+                                        sx: {
+                                            color: '#5d4037',
+                                        },
+                                    }}
                                 />
                             </Box>
 

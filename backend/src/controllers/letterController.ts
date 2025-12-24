@@ -12,6 +12,7 @@ export const getLetters = async (req: Request, res: Response) => {
         const sortBy = (req.query.sortBy as string) || 'createdAt';
         const sortOrder = (req.query.sortOrder as string) === 'asc' ? 1 : -1;
         const status = (req.query.status as string) || '';
+        const gift = (req.query.gift as string) || '';
 
         const skip = (page - 1) * limit;
 
@@ -42,11 +43,10 @@ export const getLetters = async (req: Request, res: Response) => {
                 }
             },
             {
-                $match: status ? {
+                $match: {
                     childName: { $regex: search, $options: 'i' },
-                    status: status
-                } : {
-                    childName: { $regex: search, $options: 'i' }
+                    ...(status && { status }),
+                    ...(gift && { 'gift._id': new mongoose.Types.ObjectId(gift) })
                 }
             }
         ];

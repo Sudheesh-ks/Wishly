@@ -158,6 +158,7 @@ export default function SantaDashboard() {
     });
     const [selectedSort, setSelectedSort] = useState('latest');
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [selectedGift, setSelectedGift] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
     // Modal State
@@ -226,7 +227,8 @@ export default function SantaDashboard() {
                         search: searchQuery,
                         sortBy,
                         sortOrder,
-                        status: selectedStatus
+                        status: selectedStatus,
+                        gift: selectedGift
                     }
                 });
 
@@ -243,7 +245,7 @@ export default function SantaDashboard() {
 
         load();
         return () => { active = false; };
-    }, [paginationModel, selectedSort, searchQuery, selectedStatus, santa]);
+    }, [paginationModel, selectedSort, searchQuery, selectedStatus, selectedGift, santa]);
 
     const [newTitle, setNewTitle] = useState('');
     const [newImage, setNewImage] = useState('');
@@ -333,6 +335,23 @@ export default function SantaDashboard() {
                                 </Select>
                             </FormControl>
 
+                            <FormControl size="small" sx={{ width: 200, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
+                                <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Filter Gift</InputLabel>
+                                <Select
+                                    value={selectedGift}
+                                    label="Filter Gift"
+                                    onChange={(e) => setSelectedGift(e.target.value)}
+                                    sx={{ color: 'white', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
+                                >
+                                    <MenuItem value="">All Gifts</MenuItem>
+                                    {gifts.map((gift) => (
+                                        <MenuItem key={gift._id} value={gift._id}>
+                                            🎁 {gift.title}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+
                             <TextField
                                 size="small"
                                 placeholder="Search by child name..."
@@ -367,6 +386,8 @@ export default function SantaDashboard() {
                                 paginationModel={paginationModel}
                                 onPaginationModelChange={setPaginationModel}
                                 pageSizeOptions={[5, 10, 25]}
+                                disableColumnFilter
+                                disableColumnMenu
                                 sx={{
                                     border: 'none',
                                     color: 'white',
