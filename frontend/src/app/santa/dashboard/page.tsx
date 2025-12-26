@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Typography, Box, AppBar, Toolbar, IconButton, Chip, Tabs, Tab, TextField, Button, Grid, Paper, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
@@ -15,6 +16,17 @@ import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import InputAdornment from '@mui/material/InputAdornment';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 
 interface Letter {
     _id?: string;
@@ -110,7 +122,6 @@ const LETTER_COLUMNS = (
 const getInventoryColumns = (
     handleUpdateStock: (id: string, currentStock: number) => void
 ): GridColDef[] => [
-        { field: '_id', headerName: 'Gift ID', width: 220 },
         {
             field: 'image',
             headerName: 'Image',
@@ -144,6 +155,7 @@ export default function SantaDashboard() {
     const [letters, setLetters] = useState<Letter[]>([]);
     const [totalLetters, setTotalLetters] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [toastOpen, setToastOpen] = useState(false);
 
     useEffect(() => {
         if (!authLoading && !santa) {
@@ -261,7 +273,8 @@ export default function SantaDashboard() {
             setNewTitle('');
             setNewImage('');
             setNewStock('0');
-            alert('Gift added to workshop!');
+            setToastOpen(true);
+
         }
     };
 
@@ -335,7 +348,7 @@ export default function SantaDashboard() {
                                 </Select>
                             </FormControl>
 
-                            <FormControl size="small" sx={{ width: 200, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
+                            {/* <FormControl size="small" sx={{ width: 200, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
                                 <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Filter Gift</InputLabel>
                                 <Select
                                     value={selectedGift}
@@ -350,7 +363,7 @@ export default function SantaDashboard() {
                                         </MenuItem>
                                     ))}
                                 </Select>
-                            </FormControl>
+                            </FormControl> */}
 
                             <TextField
                                 size="small"
@@ -522,6 +535,29 @@ export default function SantaDashboard() {
                     </Box>
                 </Box>
             </Modal>
+
+            <Snackbar
+  open={toastOpen}
+  autoHideDuration={3500}
+  onClose={() => setToastOpen(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert
+    onClose={() => setToastOpen(false)}
+    severity="success"
+    sx={{
+      bgcolor: '#165B33',
+      color: '#F8F3E6',
+      fontWeight: 'bold',
+      border: '1px solid #F8B229',
+      boxShadow: '0 0 20px rgba(248,178,41,0.5)',
+      fontFamily: 'var(--font-inter)',
+    }}
+    icon={false}
+  >
+    🎄 Gift successfully added to Santa's workshop!
+  </Alert>
+</Snackbar>
         </Box>
     );
 }

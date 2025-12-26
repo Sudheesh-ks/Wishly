@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import { Container, Typography, Box, Grid, AppBar, Toolbar, IconButton, Button } from '@mui/material';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
@@ -14,6 +15,16 @@ import { useSoundManager } from '@/components/SoundManager';
 import { useGift } from '@/context/GiftContext';
 import { useLetter } from '@/context/LetterContext';
 import { useAuth } from '@/context/AuthContext';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export default function DashboardPage() {
     const { isPlaying, toggleMusic } = useSoundManager();
@@ -21,6 +32,12 @@ export default function DashboardPage() {
     const { appendGift } = useLetter();
     const { user, loading, logoutUser } = useAuth();
     const router = useRouter();
+
+    const [successToast, setSuccessToast] = useState(false);
+    const [warningToast, setWarningToast] = useState(false);
+    const [formErrorToast, setFormErrorToast] = useState(false);
+
+
 
     useEffect(() => {
         if (!loading && !user) {
@@ -30,6 +47,7 @@ export default function DashboardPage() {
 
     const handleAddToLetter = (gift: any) => {
         appendGift(gift);
+        setSuccessToast(true);
         // Scroll to editor
         const editor = document.getElementById('letter-editor');
         if (editor) editor.scrollIntoView({ behavior: 'smooth' });
@@ -78,10 +96,10 @@ export default function DashboardPage() {
 
                 {/* Gift Gallery */}
                 <Typography variant="h4" sx={{ mb: 4, color: '#F8B229' }}>
-                    Gift Gallery
+                    Santa's Gift Gallery
                 </Typography>
                 <Grid container spacing={4} justifyContent="center" sx={{ mb: 12 }}>
-                    {gifts.map((gift) => (
+                    {gifts.slice(0,6).map((gift) => (
                         <Grid key={gift._id || gift.title} size={{ xs: 12, md: 4 }}>
                             <GiftCard
                                 title={gift.title}
@@ -93,14 +111,110 @@ export default function DashboardPage() {
                     ))}
                 </Grid>
 
+                <Box sx={{ textAlign: 'center', mt: 4 }}>
+  <Link href="/gifts" style={{ textDecoration: 'none' }}>
+    <Button
+      sx={{
+        color: '#F8B229',
+        fontSize: '1.1rem',
+        fontWeight: 'bold',
+        textTransform: 'none',
+        borderBottom: '2px solid transparent',
+        '&:hover': { borderBottom: '2px solid #F8B229' }
+      }}
+    >
+      🎁 Explore more Santa’s gifts →
+    </Button>
+  </Link>
+</Box>
+
+
                 {/* Letter Editor Section */}
                 <Box id="letter-editor" sx={{ mb: 8 }}>
                     <Typography variant="h4" sx={{ mb: 4, color: '#fff' }}>
                         Your Letter
                     </Typography>
-                    <LetterEditor />
+                    <LetterEditor
+                        onSendSuccess={() => setSuccessToast(true)}
+                        onSendEmpty={() => setWarningToast(true)}
+                        onFormError={() => setFormErrorToast(true)}
+                    />
                 </Box>
             </Container>
+
+
+            {/* Success Toast */}
+<Snackbar
+  open={successToast}
+  autoHideDuration={3000}
+  onClose={() => setSuccessToast(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert
+    onClose={() => setSuccessToast(false)}
+    severity="success"
+    sx={{
+      bgcolor: '#165B33',
+      color: '#F8F3E6',
+      border: '1px solid #F8B229',
+      boxShadow: '0 0 20px rgba(248,178,41,0.5)',
+      fontWeight: 'bold',
+      fontFamily: 'var(--font-inter)',
+    }}
+    icon={false}
+  >
+    🎅 Letter sent to Santa successfully!
+  </Alert>
+</Snackbar>
+
+{/* Warning Toast */}
+<Snackbar
+  open={warningToast}
+  autoHideDuration={3000}
+  onClose={() => setWarningToast(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert
+    onClose={() => setWarningToast(false)}
+    severity="warning"
+    sx={{
+      bgcolor: '#D42426',
+      color: '#fff',
+      border: '1px solid #F8B229',
+      boxShadow: '0 0 20px rgba(212,36,38,0.6)',
+      fontWeight: 'bold',
+      fontFamily: 'var(--font-inter)',
+    }}
+    icon={false}
+  >
+    🎁 Please add at least one gift before sending your letter!
+  </Alert>
+</Snackbar>
+
+
+{/* Form Error Toast */}
+<Snackbar
+  open={formErrorToast}
+  autoHideDuration={3000}
+  onClose={() => setFormErrorToast(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert
+    onClose={() => setFormErrorToast(false)}
+    severity="error"
+    sx={{
+      bgcolor: '#B71C1C',
+      color: '#fff',
+      border: '1px solid #F8B229',
+      boxShadow: '0 0 20px rgba(183,28,28,0.6)',
+      fontWeight: 'bold',
+      fontFamily: 'var(--font-inter)',
+    }}
+    icon={false}
+  >
+    ✍️ Please fill your name, location and wish!
+  </Alert>
+</Snackbar>
         </Box>
     );
 }

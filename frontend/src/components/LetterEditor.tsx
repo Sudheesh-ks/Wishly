@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { Paper, TextField, Box, Button, Typography, Alert, Snackbar } from '@mui/material';
+import { Paper, TextField, Box, Button, Typography } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import SendIcon from '@mui/icons-material/Send';
 import { createLetter } from '@/services/letterService';
 import { useLetter } from '@/context/LetterContext';
 
-const LetterEditor = () => {
+const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError }: any) => {
     const { draftText: text, setDraftText: setText, selectedGift, setSelectedGift } = useLetter();
     const [isSealed, setIsSealed] = useState(false);
     const [childName, setChildName] = useState('');
@@ -16,9 +16,15 @@ const LetterEditor = () => {
 
     const handleSeal = async () => {
         if (!childName || !location || !text) {
-            setError('Please fill in your name, location and your wish!');
+            onFormError?.();
             return;
         }
+
+if (!selectedGift) {
+    onSendEmpty?.();
+    return;
+}
+
 
         try {
             await createLetter({
@@ -30,7 +36,7 @@ const LetterEditor = () => {
             });
 
             setIsSealed(true);
-            setSuccess(true);
+            onSendSuccess?.();
 
             // Reset after animation
             setTimeout(() => {
@@ -214,18 +220,6 @@ const LetterEditor = () => {
                     </Box>
                 )}
             </AnimatePresence>
-
-            <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-                <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
-                    {error}
-                </Alert>
-            </Snackbar>
-
-            <Snackbar open={success && !isSealed} autoHideDuration={6000} onClose={() => setSuccess(false)}>
-                <Alert onClose={() => setSuccess(false)} severity="success" sx={{ width: '100%' }}>
-                    Your letter has been sent to Santa! 🎅
-                </Alert>
-            </Snackbar>
         </Box>
     );
 };
