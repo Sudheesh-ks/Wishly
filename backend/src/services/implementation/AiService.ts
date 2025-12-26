@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { LetterStatus } from "../../types/letter.types";
 
-export const analyzeLetterContent = async (content: string): Promise<'Nice' | 'Naughty' | 'Sorting'> => {
+export const analyzeLetterContent = async (content: string): Promise<LetterStatus> => {
     console.log("--- AI Analysis Start ---");
     console.log("Content:", content);
 

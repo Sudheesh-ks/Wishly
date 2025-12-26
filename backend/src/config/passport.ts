@@ -21,7 +21,7 @@ passport.use(
                         googleId: profile.id,
                         email: profile.emails?.[0].value,
                         name: profile.displayName,
-                        role: 'user', // Default role
+                        role: 'user', 
                     });
                 } else if (!user.name) {
                     user.name = profile.displayName;

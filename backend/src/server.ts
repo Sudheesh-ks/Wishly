@@ -6,9 +6,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import './config/passport'; // Initialize passport
 import { connectDB } from './config/mongodb';
-import authRouter from './routes/authRoute';
-import giftRouter from './routes/giftRoute';
-import letterRouter from './routes/letterRoute';
+import authRouter from './routes/auth.routes';
+import giftRouter from './routes/gift.routes';
+import letterRouter from './routes/letter.routes';
 import passport from 'passport';
 
 const app = express();

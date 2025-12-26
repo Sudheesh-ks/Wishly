@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { LetterStatus } from '../types/letter.types';
 
-export interface ILetter extends Document {
+export interface LetterDocument extends Document {
     childName: string;
     location: string;
     wishList?: string;
     giftId?: mongoose.Types.ObjectId;
-    status: 'Nice' | 'Naughty' | 'Sorting';
+    status: LetterStatus;
     isPacked: boolean;
     content?: string;
     createdAt: Date;
@@ -22,4 +23,4 @@ const LetterSchema: Schema = new Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<ILetter>('Letter', LetterSchema);
+export default mongoose.model<LetterDocument>('Letter', LetterSchema);

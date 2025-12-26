@@ -177,6 +177,12 @@ export default function SantaDashboard() {
     const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
 
+    // Stock Modal State
+const [stockModalOpen, setStockModalOpen] = useState(false);
+const [stockGiftId, setStockGiftId] = useState<string | null>(null);
+const [stockValue, setStockValue] = useState('');
+
+
     const handlePackedToggle = useCallback(async (id: string, isPacked: boolean) => {
         try {
             await santaApi.patch(`/letters/${id}/packed`, { isPacked });
@@ -201,15 +207,22 @@ export default function SantaDashboard() {
     }, []);
 
     const { updateGiftStock } = useGift();
-    const handleUpdateStock = useCallback(async (id: string, currentStock: number) => {
-        const newStockStr = prompt('Enter new stock count:', currentStock.toString());
-        if (newStockStr !== null) {
-            const newStockValue = parseInt(newStockStr);
-            if (!isNaN(newStockValue)) {
-                await updateGiftStock(id, newStockValue);
-            }
-        }
-    }, [updateGiftStock]);
+    const handleUpdateStock = useCallback((id: string, currentStock: number) => {
+  setStockGiftId(id);
+  setStockValue(currentStock.toString());
+  setStockModalOpen(true);
+}, []);
+
+
+const confirmStockUpdate = async () => {
+  if (!stockGiftId) return;
+
+  const newStock = parseInt(stockValue);
+  if (isNaN(newStock)) return;
+
+  await updateGiftStock(stockGiftId, newStock);
+  setStockModalOpen(false);
+};
 
     const columns = useMemo(() => LETTER_COLUMNS(handleViewLetter, handlePackedToggle, handleStatusChange), [handleViewLetter, handlePackedToggle, handleStatusChange]);
     const inventoryColumns = useMemo(() => getInventoryColumns(handleUpdateStock), [handleUpdateStock]);
@@ -535,6 +548,69 @@ export default function SantaDashboard() {
                     </Box>
                 </Box>
             </Modal>
+
+
+            <Modal
+  open={stockModalOpen}
+  onClose={() => setStockModalOpen(false)}
+  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+>
+  <Box
+    sx={{
+      width: 320,
+      bgcolor: 'rgba(15, 25, 45, 0.95)',
+      borderRadius: 3,
+      p: 4,
+      border: '2px solid #F8B229',
+      boxShadow: '0 0 30px rgba(248,178,41,0.3)',
+      color: 'white',
+      textAlign: 'center',
+      backdropFilter: 'blur(10px)',
+    }}
+  >
+    <Typography variant="h6" sx={{ mb: 2, color: '#F8B229', fontWeight: 'bold' }}>
+      🎁 Update Gift Stock
+    </Typography>
+
+    <TextField
+      type="number"
+      fullWidth
+      value={stockValue}
+      onChange={(e) => setStockValue(e.target.value)}
+      sx={{
+        mb: 3,
+        '& input': { color: 'white', textAlign: 'center', fontSize: 18 },
+        '& label': { color: 'rgba(255,255,255,0.7)' },
+        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+      }}
+    />
+
+    <Box sx={{ display: 'flex', gap: 2 }}>
+      <Button
+        fullWidth
+        variant="outlined"
+        onClick={() => setStockModalOpen(false)}
+        sx={{ color: '#F8F3E6', borderColor: '#F8F3E6' }}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        fullWidth
+        variant="contained"
+        onClick={confirmStockUpdate}
+        sx={{
+          bgcolor: '#165B33',
+          '&:hover': { bgcolor: '#124a2a' },
+          fontWeight: 'bold',
+        }}
+      >
+        Save
+      </Button>
+    </Box>
+  </Box>
+</Modal>
+
 
             <Snackbar
   open={toastOpen}

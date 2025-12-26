@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IGift extends Document {
+export interface GiftDocument extends Document {
     title: string;
     image: string;
     stock: number;
@@ -12,4 +12,4 @@ const GiftSchema: Schema = new Schema({
     stock: { type: Number, default: 0 },
 });
 
-export default mongoose.model<IGift>('Gift', GiftSchema);
+export default mongoose.model<GiftDocument>('Gift', GiftSchema);
