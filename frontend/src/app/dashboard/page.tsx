@@ -36,6 +36,7 @@ export default function DashboardPage() {
     const [successToast, setSuccessToast] = useState(false);
     const [warningToast, setWarningToast] = useState(false);
     const [formErrorToast, setFormErrorToast] = useState(false);
+    const [sending, setSending] = useState(false);
 
 
 
@@ -47,7 +48,7 @@ export default function DashboardPage() {
 
     const handleAddToLetter = (gift: any) => {
         appendGift(gift);
-        setSuccessToast(true);
+        // setSuccessToast(true);
         // Scroll to editor
         const editor = document.getElementById('letter-editor');
         if (editor) editor.scrollIntoView({ behavior: 'smooth' });
@@ -135,10 +136,20 @@ export default function DashboardPage() {
                         Your Letter
                     </Typography>
                     <LetterEditor
-                        onSendSuccess={() => setSuccessToast(true)}
-                        onSendEmpty={() => setWarningToast(true)}
-                        onFormError={() => setFormErrorToast(true)}
-                    />
+  setSending={setSending}
+  onSendSuccess={() => {
+    setSending(false);
+    setSuccessToast(true);
+  }}
+  onSendEmpty={() => {
+    setSending(false);
+    setWarningToast(true);
+  }}
+  onFormError={() => {
+    setSending(false);
+    setFormErrorToast(true);
+  }}
+/>
                 </Box>
             </Container>
 

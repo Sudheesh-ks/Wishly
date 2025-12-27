@@ -94,9 +94,8 @@ const LETTER_COLUMNS = (
                         size="small"
                         variant="outlined"
                         onClick={() => {
-                            const nextStatus = params.value === 'Sorting' ? 'Nice' : params.value === 'Nice' ? 'Naughty' : 'Sorting';
-                            handleStatusChange(params.row._id, nextStatus);
-                        }}
+  if (params.value === 'Sorting') return; // Don't allow manual override
+}}
                         sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
                     />
                 );

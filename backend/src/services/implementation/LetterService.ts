@@ -41,6 +41,19 @@ export class LetterService implements ILetterService {
         },
       },
       { $sort: { [sortBy]: sortOrder } },
+        {
+    $project: {
+      childName: 1,
+      location: 1,
+      wishList: 1,
+      content: 1,
+      status: 1,
+      isPacked: 1,
+      gift: 1,
+      createdAt: 1,
+      popularity: 1,
+    }
+  }
     ];
 
     const countResult = await this._letterRepo.aggregate([...pipeline, { $count: 'total' }]);

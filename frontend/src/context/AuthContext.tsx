@@ -158,17 +158,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         initAuth();
     }, []);
 
-    const logoutUser = () => {
-        localStorage.removeItem('wishly_user_token');
-        setUser(null);
-        window.location.href = '/login';
-    };
+const logoutUser = async () => {
+  try {
+    await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+  } catch {}
 
-    const logoutSanta = () => {
-        localStorage.removeItem('wishly_santa_token');
-        setSanta(null);
-        window.location.href = '/santa/login';
-    };
+  localStorage.removeItem('wishly_user_token');
+  setUser(null);
+  window.location.href = '/login';
+};
+
+
+const logoutSanta = async () => {
+  try {
+    await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+  } catch {}
+
+  localStorage.removeItem('wishly_santa_token');
+  setSanta(null);
+  window.location.href = '/santa/login';
+};
 
     const refreshUser = async () => {
         await fetchUser();

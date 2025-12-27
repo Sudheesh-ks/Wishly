@@ -26,4 +26,13 @@ export class AuthController implements IAuthController {
     res.cookie('refreshToken_santa', result.refreshToken, { httpOnly: true, path: '/' });
     res.json({ token: result.accessToken });
   }
+
+
+  async logout(req: Request, res: Response): Promise<void> {
+  res.clearCookie('refreshToken_user', { path: '/' });
+  res.clearCookie('refreshToken_santa', { path: '/' });
+
+  res.status(200).json({ message: 'Logged out successfully' });
+}
+
 }

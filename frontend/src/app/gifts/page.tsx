@@ -7,6 +7,7 @@ import Snowfall from '@/components/Snowfall';
 import { useGift } from '@/context/GiftContext';
 import { useLetter } from '@/context/LetterContext';
 import { useRouter } from 'next/navigation';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 
 
 export default function GiftGalleryPage() {
@@ -16,7 +17,7 @@ export default function GiftGalleryPage() {
 
 
   const [page, setPage] = useState(1);
-  const pageSize = 3;
+  const pageSize = 6;
 
   const start = (page - 1) * pageSize;
   const paginatedGifts = gifts.slice(start, start + pageSize);
@@ -26,6 +27,30 @@ export default function GiftGalleryPage() {
       <Snowfall />
 
       <Container maxWidth="lg" sx={{ py: 6 }}>
+        <Box sx={{ position: 'sticky', top: 20, zIndex: 10, mb: 3 }}>
+  <Button
+    startIcon={<ArrowBackRoundedIcon />}
+    onClick={() => router.push('/dashboard')}
+    sx={{
+      color: '#F8B229',
+      border: '1px solid rgba(248,178,41,0.5)',
+      borderRadius: '999px',
+      px: 3,
+      py: 1,
+      fontWeight: 600,
+      backdropFilter: 'blur(6px)',
+      background: 'rgba(0,0,0,0.35)',
+      transition: '0.3s',
+      '&:hover': {
+        background: 'rgba(248,178,41,0.15)',
+        boxShadow: '0 0 12px rgba(248,178,41,0.4)',
+      },
+    }}
+  >
+    Back to Dashboard
+  </Button>
+</Box>
+
         <Typography
           variant="h3"
           sx={{ mb: 6, textAlign: 'center', color: '#F8B229', fontFamily: 'var(--font-mountains)' }}
