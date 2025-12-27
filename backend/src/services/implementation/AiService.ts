@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { LetterStatus } from "../../types/letter.types";
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const analyzeLetterContent = async (content: string): Promise<LetterStatus> => {
     console.log("--- AI Analysis Start ---");
@@ -13,7 +15,7 @@ export const analyzeLetterContent = async (content: string): Promise<LetterStatu
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         const prompt = `
             You are Santa Clauses's Head Elf in charge of the Naughty or Nice list.
@@ -31,21 +33,14 @@ export const analyzeLetterContent = async (content: string): Promise<LetterStatu
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const text = response.text().trim().toLowerCase();
+        const text = response.text().trim();
 
-        console.log("AI Raw result:", text);
+const verdict = text.match(/\b(Nice|Naughty)\b/i)?.[0];
 
-        if (text.includes("nice")) {
-            console.log("Verdict: NICE ✨");
-            return "Nice";
-        }
-        if (text.includes("naughty")) {
-            console.log("Verdict: NAUGHTY 👹");
-            return "Naughty";
-        }
+if (verdict === 'Nice') return 'Nice';
+if (verdict === 'Naughty') return 'Naughty';
 
-        console.warn("AI returned an ambiguous result, defaulting to Sorting.");
-        return "Sorting";
+return 'Sorting';
     } catch (error) {
         console.error("AI Analysis Error:", error);
         return "Sorting";

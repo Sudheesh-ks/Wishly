@@ -24,11 +24,15 @@ export class AuthService implements IAuthService {
   }
 
 async refresh(cookies: any) {
-  const token = cookies.refreshToken_user || cookies.refreshToken_santa;
-  if (!token) throw new Error('No refresh token');
+  const userToken = cookies.refreshToken_user;
+const santaToken = cookies.refreshToken_santa;
+
+if (!userToken && !santaToken) throw new Error('No refresh token');
+
+const token = userToken || santaToken;
+const role = userToken ? 'user' : 'santa';
 
   const decoded = verifyRefreshToken(token);
-  const role = cookies.refreshToken_user ? 'user' : 'santa';
 
   if (role === 'user') {
     const user = await this._userRepo.findById(decoded.id);
