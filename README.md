@@ -64,11 +64,14 @@ This project demonstrates a real-world full-stack architecture with modern techn
 ```bash
 git clone https://github.com/yourusername/wishly.git
 cd wishly
+```
 
 ### 2️⃣ Setup Backend
 
+```bash
 cd backend
 npm install
+
 
 Create a .env file inside the backend folder:
 
@@ -81,20 +84,27 @@ GEMINI_API_KEY=your_gemini_api_key
 Start the backend server:
 
 npm run dev
+```
 
 ### 2️⃣ Setup Frontend
+
+```bash
 cd frontend
 npm install
 
 
 Create a .env.local file inside the frontend folder:
 
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 
 
 Run the frontend server:
 
 npm run dev
+```
 
 ### 2️⃣ Open In Browser
+
+```bash
 http://localhost:3000
+```
