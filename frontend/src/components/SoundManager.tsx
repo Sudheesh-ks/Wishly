@@ -10,15 +10,15 @@ const SOUND_URLS = {
 interface SoundContextType {
     isPlaying: boolean;
     toggleMusic: () => void;
-    playJingle: () => void;
-    playPoof: () => void;
+    // playJingle: () => void;
+    // playPoof: () => void;
 }
 
 const SoundContext = createContext<SoundContextType>({
     isPlaying: false,
     toggleMusic: () => { },
-    playJingle: () => { },
-    playPoof: () => { },
+    // playJingle: () => { },
+    // playPoof: () => { },
 });
 
 export const useSoundManager = () => useContext(SoundContext);
