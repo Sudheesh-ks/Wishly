@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { IGiftService } from '../../services/interface/IGiftService';
+import { Request, Response } from "express";
+import { IGiftService } from "../../services/interface/IGiftService";
 
 export class GiftController {
   constructor(private readonly _giftService: IGiftService) {}
@@ -19,4 +19,3 @@ export class GiftController {
     res.status(200).json(gift);
   }
 }
-

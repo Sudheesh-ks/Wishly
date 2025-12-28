@@ -1,7 +1,7 @@
-import { LetterService } from '../services/implementation/LetterService';
-import { LetterRepository } from '../repositories/implementation/LetterRepository';
-import { GiftRepository } from '../repositories/implementation/GiftRepository';
-import { LetterController } from '../controllers/implementation/LetterController';
+import { LetterService } from "../services/implementation/LetterService";
+import { LetterRepository } from "../repositories/implementation/LetterRepository";
+import { GiftRepository } from "../repositories/implementation/GiftRepository";
+import { LetterController } from "../controllers/implementation/LetterController";
 
 const letterRepo = new LetterRepository();
 const giftRepo = new GiftRepository();

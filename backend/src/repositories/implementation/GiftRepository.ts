@@ -1,6 +1,6 @@
-import Gift, { GiftDocument } from '../../models/Gift';
-import { BaseRepository } from '../BaseRepository';
-import { IGiftRepository } from '../interface/IGiftRepository';
+import Gift, { GiftDocument } from "../../models/Gift";
+import { BaseRepository } from "../BaseRepository";
+import { IGiftRepository } from "../interface/IGiftRepository";
 
 export class GiftRepository
   extends BaseRepository<GiftDocument>

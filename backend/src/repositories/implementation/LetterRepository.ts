@@ -1,10 +1,11 @@
-import Letter, { LetterDocument } from '../../models/Letter';
-import { BaseRepository } from '../BaseRepository';
-import { ILetterRepository } from '../interface/ILetterRepository';
+import Letter, { LetterDocument } from "../../models/Letter";
+import { BaseRepository } from "../BaseRepository";
+import { ILetterRepository } from "../interface/ILetterRepository";
 
 export class LetterRepository
   extends BaseRepository<LetterDocument>
-  implements ILetterRepository {
+  implements ILetterRepository
+{
   constructor() {
     super(Letter);
   }
