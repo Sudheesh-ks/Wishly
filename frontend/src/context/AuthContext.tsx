@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/api';
 
 interface User {
     _id: string;
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshUserToken = async (): Promise<string | null> => {
         try {
-            const response = await axios.post('http://localhost:5000/auth/refresh', {}, { withCredentials: true });
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
             if (response.data.role === 'user' && response.data.token) {
                 localStorage.setItem('wishly_user_token', response.data.token);
                 return response.data.token;
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshSantaToken = async (): Promise<string | null> => {
         try {
-            const response = await axios.post('http://localhost:5000/auth/refresh', {}, { withCredentials: true });
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
             if (response.data.role === 'santa' && response.data.token) {
                 localStorage.setItem('wishly_santa_token', response.data.token);
                 return response.data.token;
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            const response = await axios.get('http://localhost:5000/auth/me', {
+            const response = await axios.get(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -83,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 token = await refreshUserToken();
                 if (token) {
                     try {
-                        const response = await axios.get('http://localhost:5000/auth/me', {
+                        const response = await axios.get(`${API_BASE_URL}/auth/me`, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
                             },
@@ -116,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            const response = await axios.get('http://localhost:5000/auth/me', {
+            const response = await axios.get(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -129,7 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 token = await refreshSantaToken();
                 if (token) {
                     try {
-                        const response = await axios.get('http://localhost:5000/auth/me', {
+                        const response = await axios.get(`${API_BASE_URL}/auth/me`, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
                             },
@@ -160,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 const logoutUser = async () => {
   try {
-    await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+    await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
   } catch {}
 
   localStorage.removeItem('wishly_user_token');
@@ -171,7 +172,7 @@ const logoutUser = async () => {
 
 const logoutSanta = async () => {
   try {
-    await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+    await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
   } catch {}
 
   localStorage.removeItem('wishly_santa_token');

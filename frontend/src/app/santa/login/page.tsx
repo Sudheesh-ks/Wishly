@@ -8,6 +8,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import Snowfall from '@/components/Snowfall';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { API_BASE_URL } from '@/config/api';
 
 export default function SantaLoginPage() {
     const router = useRouter();
@@ -24,7 +25,7 @@ export default function SantaLoginPage() {
     const handleLogin = async () => {
         try {
             setError('');
-            const response = await axios.post('http://localhost:5000/auth/santa/login', { password }, { withCredentials: true });
+            const response = await axios.post(`${API_BASE_URL}/auth/santa/login`, { password }, { withCredentials: true });
 
             if (response.data.token) {
                 localStorage.setItem('wishly_santa_token', response.data.token);

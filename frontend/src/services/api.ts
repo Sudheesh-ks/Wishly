@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/api';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: `${API_BASE_URL}/api`,
     withCredentials: true,
 });
 
@@ -29,7 +30,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const response = await axios.post('http://localhost:5000/auth/refresh', {}, { withCredentials: true });
+                const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
 
                 if (response.data.role === 'user' && response.data.token) {
                     localStorage.setItem('wishly_user_token', response.data.token);
