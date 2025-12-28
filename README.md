@@ -62,7 +62,7 @@ This project demonstrates a real-world full-stack architecture with modern techn
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/wishly.git
+git clone https://github.com/Sudheesh-ks/Wishly.git
 cd wishly
 ```
 
@@ -93,7 +93,7 @@ cd frontend
 npm install
 
 
-Create a .env.local file inside the frontend folder:
+Create a .env file inside the frontend folder:
 
 NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
 
