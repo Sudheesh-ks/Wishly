@@ -8,6 +8,7 @@ interface GiftContextType {
     addGift: (gift: Omit<Gift, '_id'>) => Promise<void>;
     updateGiftStock: (id: string, stock: number) => Promise<void>;
     updateGift: (id: string, updates: Partial<Gift>) => Promise<void>;
+    fetchGifts: () => Promise<void>;
 }
 
 const GiftContext = createContext<GiftContextType | undefined>(undefined);
@@ -56,7 +57,7 @@ export function GiftProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler, updateGiftStock: updateGiftStockHandler, updateGift: updateGiftHandler }}>
+        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler, updateGiftStock: updateGiftStockHandler, updateGift: updateGiftHandler, fetchGifts: loadGifts }}>
             {children}
         </GiftContext.Provider>
     );
