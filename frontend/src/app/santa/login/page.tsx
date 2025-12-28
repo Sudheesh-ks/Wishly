@@ -34,7 +34,7 @@ export default function SantaLoginPage() {
             }
         } catch (err: any) {
             console.error('Login error:', err);
-            setError(err.response?.data?.message || 'The elves are busy, try again later!');
+            setError(err.response?.data?.message || 'Invalid Password, Are you really Santa!');
         }
     };
 
@@ -83,7 +83,7 @@ export default function SantaLoginPage() {
 
                         <TextField
                             type="password"
-                            placeholder="Secret Password"
+                            placeholder="Secret Password(santa@123)"
                             fullWidth
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}

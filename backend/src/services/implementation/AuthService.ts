@@ -9,7 +9,7 @@ export class AuthService implements IAuthService {
   constructor(
     private readonly _userRepo: IUserRepository,
     private readonly _adminRepo: IAdminRepository
-  ) {}
+  ) { }
 
   async handleGoogleLogin(user: any) {
     return {
@@ -23,35 +23,50 @@ export class AuthService implements IAuthService {
     return toAuthDTO(await this._userRepo.findById(user.id), 'user');
   }
 
-async refresh(cookies: any) {
-  const userToken = cookies.refreshToken_user;
-const santaToken = cookies.refreshToken_santa;
+  async refresh(cookies: any, role?: string) {
+    const userToken = cookies.refreshToken_user;
+    const santaToken = cookies.refreshToken_santa;
 
-if (!userToken && !santaToken) throw new Error('No refresh token');
+    if (!userToken && !santaToken) throw new Error('No refresh token');
 
-const token = userToken || santaToken;
-const role = userToken ? 'user' : 'santa';
+    let token = '';
+    let targetRole = '';
 
-  const decoded = verifyRefreshToken(token);
+    if (role === 'santa') {
+      if (!santaToken) throw new Error('No santa refresh token');
+      token = santaToken;
+      targetRole = 'santa';
+    } else if (role === 'user') {
+      if (!userToken) throw new Error('No user refresh token');
+      token = userToken;
+      targetRole = 'user';
+    } else {
+      // Fallback or mixed scenario (prioritize existing logic or user)
+      token = userToken || santaToken;
+      targetRole = userToken ? 'user' : 'santa';
+    }
 
-  if (role === 'user') {
-    const user = await this._userRepo.findById(decoded.id);
-    if (!user) throw new Error('User not found');
+
+    const decoded = verifyRefreshToken(token);
+
+    if (targetRole === 'user') {
+      const user = await this._userRepo.findById(decoded.id);
+      if (!user) throw new Error('User not found');
+
+      return {
+        token: generateAccessToken(user._id.toString(), user.email, 'user'),
+        role: 'user',
+      };
+    }
+
+    const admin = await this._adminRepo.findById(decoded.id);
+    if (!admin) throw new Error('Santa not found');
 
     return {
-      token: generateAccessToken(user._id.toString(), user.email, 'user'),
-      role: 'user',
+      token: generateAccessToken(admin._id.toString(), 'santa@northpole.com', 'santa'),
+      role: 'santa',
     };
   }
-
-  const admin = await this._adminRepo.findById(decoded.id);
-  if (!admin) throw new Error('Santa not found');
-
-  return {
-    token: generateAccessToken(admin._id.toString(), 'santa@northpole.com', 'santa'),
-    role: 'santa',
-  };
-}
 
   async santaLogin(password: string) {
     const admin = await this._adminRepo.findOne({});

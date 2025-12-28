@@ -10,7 +10,7 @@ export class LetterService implements ILetterService {
   constructor(
     private readonly _letterRepo: ILetterRepository,
     private readonly _giftRepo: IGiftRepository
-  ) {}
+  ) { }
 
   async getLetters(query: any) {
     const page = parseInt(query.page) || 1;
@@ -41,19 +41,19 @@ export class LetterService implements ILetterService {
         },
       },
       { $sort: { [sortBy]: sortOrder } },
-        {
-    $project: {
-      childName: 1,
-      location: 1,
-      wishList: 1,
-      content: 1,
-      status: 1,
-      isPacked: 1,
-      gift: 1,
-      createdAt: 1,
-      popularity: 1,
-    }
-  }
+      {
+        $project: {
+          childName: 1,
+          location: 1,
+          wishList: 1,
+          content: 1,
+          status: 1,
+          isPacked: 1,
+          gift: 1,
+          createdAt: 1,
+          popularity: 1,
+        }
+      }
     ];
 
     const countResult = await this._letterRepo.aggregate([...pipeline, { $count: 'total' }]);
@@ -79,15 +79,18 @@ export class LetterService implements ILetterService {
   async createLetter(data: any) {
     const { childName, location, wishList, content, giftId } = data;
 
-    if (giftId && mongoose.isValidObjectId(giftId)) {
-      const gift = await this._giftRepo.findById(giftId);
-      if (!gift || gift.stock <= 0) throw new Error('Gift out of stock');
-
-      await this._giftRepo.updateAndReturn(giftId, { stock: gift.stock - 1 });
-    }
-
     const analysisText = content || (typeof wishList === 'string' ? wishList : '');
     const status: LetterStatus = await analyzeLetterContent(analysisText);
+
+    if (giftId && mongoose.isValidObjectId(giftId)) {
+      if (status === 'Nice') {
+        const gift = await this._giftRepo.findById(giftId);
+        if (!gift) throw new Error('Gift not found'); // Check existence first
+        if (gift.stock <= 0) throw new Error('Gift out of stock');
+
+        await this._giftRepo.updateAndReturn(giftId, { stock: gift.stock - 1 });
+      }
+    }
 
     const letter = await this._letterRepo.create({
       childName,

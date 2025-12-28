@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshUserToken = async (): Promise<string | null> => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { role: 'user' }, { withCredentials: true });
             if (response.data.role === 'user' && response.data.token) {
                 localStorage.setItem('wishly_user_token', response.data.token);
                 return response.data.token;
@@ -46,13 +46,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshSantaToken = async (): Promise<string | null> => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, { role: 'santa' }, { withCredentials: true });
             if (response.data.role === 'santa' && response.data.token) {
                 localStorage.setItem('wishly_santa_token', response.data.token);
                 return response.data.token;
             }
         } catch (err) {
-            console.error('Failed to refresh santa token:', err);
+            // If refresh fails (e.g., 401), we should clear the token
+            // Do NOT log error as "Failed" if it's just a missing cookie/empty state on load
+            if (axios.isAxiosError(err) && err.response?.status !== 401) {
+                console.error('Failed to refresh santa token:', err);
+            }
             localStorage.removeItem('wishly_santa_token');
         }
         return null;
@@ -159,26 +163,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         initAuth();
     }, []);
 
-const logoutUser = async () => {
-  try {
-    await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
-  } catch {}
+    const logoutUser = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+        } catch { }
 
-  localStorage.removeItem('wishly_user_token');
-  setUser(null);
-  window.location.href = '/login';
-};
+        localStorage.removeItem('wishly_user_token');
+        setUser(null);
+        window.location.href = '/login';
+    };
 
 
-const logoutSanta = async () => {
-  try {
-    await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
-  } catch {}
+    const logoutSanta = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+        } catch { }
 
-  localStorage.removeItem('wishly_santa_token');
-  setSanta(null);
-  window.location.href = '/santa/login';
-};
+        localStorage.removeItem('wishly_santa_token');
+        setSanta(null);
+        window.location.href = '/santa/login';
+    };
 
     const refreshUser = async () => {
         await fetchUser();
