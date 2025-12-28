@@ -23,8 +23,11 @@ const GiftCard = ({ title, image, stock = 0, onAdd }: GiftCardProps) => {
             whileHover={isOutOfStock ? {} : { scale: 1.05, rotate: 1 }}
             transition={{ type: 'spring', stiffness: 300 }}
             sx={{
-                width: 280,
-                height: 380, // Slightly taller to fit stock info
+                width: '100%',
+                maxWidth: 340,
+                mx: 'auto', // Centering
+                minHeight: 380, // Allow expansion
+                height: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
