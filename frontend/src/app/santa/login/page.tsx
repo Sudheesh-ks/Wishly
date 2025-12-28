@@ -83,7 +83,7 @@ export default function SantaLoginPage() {
 
                         <TextField
                             type="password"
-                            placeholder="Secret Password(santa@123)"
+                            placeholder="Secret Password"
                             fullWidth
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
