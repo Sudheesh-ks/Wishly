@@ -1,64 +1,68 @@
 'use client';
 import { useState } from 'react';
-import { Paper, TextField, Box, Button, Typography } from '@mui/material';
+import { Paper, TextField, Box, Button, Typography, Snackbar, Alert as MuiAlert } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import SendIcon from '@mui/icons-material/Send';
 import { createLetter } from '@/services/letterService';
 import { useLetter } from '@/context/LetterContext';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, setSending }: any) => {
+const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, onError, setSending }: any) => {
     const { draftText: text, setDraftText: setText, selectedGift, setSelectedGift } = useLetter();
     const [isSealed, setIsSealed] = useState(false);
     const [childName, setChildName] = useState('');
     const [location, setLocation] = useState('');
-    const [error, setError] = useState<string | null>(null);
+    // const [error, setError] = useState<string | null>(null); // Removed local error
     const [success, setSuccess] = useState(false);
     const [sending, setLocalSending] = useState(false);
 
     const handleSeal = async () => {
-  if (!childName || !location || !text) {
-    onFormError?.();
-    return;
-  }
+        if (!childName || !location || !text) {
+            onFormError?.();
+            return;
+        }
 
-  if (!selectedGift) {
-    onSendEmpty?.();
-    return;
-  }
+        if (!selectedGift) {
+            onSendEmpty?.();
+            return;
+        }
 
-  try {
-    setLocalSending(true);
-    setSending?.(true);
+        try {
+            setLocalSending(true);
+            setSending?.(true);
 
-    await createLetter({
-      childName,
-      location,
-      wishList: text,
-      content: text,
-      giftId: selectedGift?._id || undefined
-    });
+            await createLetter({
+                childName,
+                location,
+                wishList: text,
+                content: text,
+                giftId: selectedGift?._id || undefined
+            });
 
-    setIsSealed(true);
-    onSendSuccess?.();
+            setIsSealed(true);
+            onSendSuccess?.();
 
-    setTimeout(() => {
-      setIsSealed(false);
-      setText('');
-      setChildName('');
-      setLocation('');
-      setSelectedGift(null);
-      setSuccess(false);
-      setLocalSending(false);
-      setSending?.(false);
-    }, 6000);
-  } catch (err) {
-    console.error(err);
-    setError('Santa is busy! Please try sending your letter again later.');
-    setLocalSending(false);
-    setSending?.(false);
-  }
-};
+            setTimeout(() => {
+                setIsSealed(false);
+                setText('');
+                setChildName('');
+                setLocation('');
+                setSelectedGift(null);
+                setSuccess(false);
+                setLocalSending(false);
+                setSending?.(false);
+            }, 6000);
+        } catch (err: any) {
+            console.error(err);
+            if (err.response?.status === 409 || err.message?.includes('already sent')) {
+                onError?.("You've already sent a letter from this location! Santa is checking it twice.");
+            } else {
+                onError?.('Santa is busy! Please try sending your letter again later.');
+            }
+            setLocalSending(false);
+            setSending?.(false);
+        }
+    };
 
 
     return (
@@ -170,39 +174,39 @@ const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, setSending }: a
                             />
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                                 <Button
-  variant="contained"
-  color="error"
-  onClick={handleSeal}
-  disabled={sending}
-  sx={{
-    borderRadius: 50,
-    boxShadow: '0 4px 15px rgba(212, 36, 38, 0.4)',
-    fontFamily: 'var(--font-mountains)',
-    fontSize: '1.2rem',
-    px: 4,
-    py: 1.2,
-    minWidth: 260,
-    bgcolor: '#D42426',
-    '&:hover': {
-      bgcolor: '#B71C1C',
-    },
-    opacity: sending ? 0.85 : 1,
-  }}
->
-  {sending ? (
-    <CircularProgress
-      size={26}
-      thickness={5}
-      sx={{
-        color: '#F8B229',   // gold spinner on red button 🎄
-      }}
-    />
-  ) : (
-    <>
-      Seal & Send to North Pole <SendIcon />
-    </>
-  )}
-</Button>
+                                    variant="contained"
+                                    color="error"
+                                    onClick={handleSeal}
+                                    disabled={sending}
+                                    sx={{
+                                        borderRadius: 50,
+                                        boxShadow: '0 4px 15px rgba(212, 36, 38, 0.4)',
+                                        fontFamily: 'var(--font-mountains)',
+                                        fontSize: '1.2rem',
+                                        px: 4,
+                                        py: 1.2,
+                                        minWidth: 260,
+                                        bgcolor: '#D42426',
+                                        '&:hover': {
+                                            bgcolor: '#B71C1C',
+                                        },
+                                        opacity: sending ? 0.85 : 1,
+                                    }}
+                                >
+                                    {sending ? (
+                                        <CircularProgress
+                                            size={26}
+                                            thickness={5}
+                                            sx={{
+                                                color: '#F8B229',   // gold spinner on red button 🎄
+                                            }}
+                                        />
+                                    ) : (
+                                        <>
+                                            Seal & Send to North Pole <SendIcon />
+                                        </>
+                                    )}
+                                </Button>
                             </Box>
                         </Paper>
                     </Box>
@@ -247,6 +251,8 @@ const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, setSending }: a
                     </Box>
                 )}
             </AnimatePresence>
+
+
         </Box>
     );
 };

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ILetterService } from '../../services/interface/ILetterService';
 
 export class LetterController {
-  constructor(private readonly _letterService: ILetterService) {}
+  constructor(private readonly _letterService: ILetterService) { }
 
   async getLetters(req: Request, res: Response): Promise<void> {
     try {
@@ -19,7 +19,11 @@ export class LetterController {
       const letter = await this._letterService.createLetter(req.body);
       res.status(201).json(letter);
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      if (error.message.includes('already sent')) {
+        res.status(409).json({ message: error.message });
+      } else {
+        res.status(400).json({ message: error.message });
+      }
     }
   }
 
