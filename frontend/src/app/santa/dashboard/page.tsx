@@ -21,10 +21,10 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref,
+    props,
+    ref,
 ) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 
@@ -94,8 +94,8 @@ const LETTER_COLUMNS = (
                         size="small"
                         variant="outlined"
                         onClick={() => {
-  if (params.value === 'Sorting') return; // Don't allow manual override
-}}
+                            if (params.value === 'Sorting') return; // Don't allow manual override
+                        }}
                         sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
                     />
                 );
@@ -119,7 +119,8 @@ const LETTER_COLUMNS = (
 
 // --- Inventory Tab Data ---
 const getInventoryColumns = (
-    handleUpdateStock: (id: string, currentStock: number) => void
+    handleUpdateStock: (id: string, currentStock: number) => void,
+    handleEditGift: (gift: any) => void
 ): GridColDef[] => [
         {
             field: 'image',
@@ -132,15 +133,24 @@ const getInventoryColumns = (
         {
             field: 'action',
             headerName: 'Action',
-            width: 150,
+            width: 200,
             renderCell: (params) => (
-                <Button
-                    size="small"
-                    onClick={() => handleUpdateStock(params.row._id, params.row.stock || 0)}
-                    sx={{ color: '#F8B229', textTransform: 'none' }}
-                >
-                    Update Stock
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        size="small"
+                        onClick={() => handleUpdateStock(params.row._id, params.row.stock || 0)}
+                        sx={{ color: '#F8B229', textTransform: 'none' }}
+                    >
+                        Stock
+                    </Button>
+                    <Button
+                        size="small"
+                        onClick={() => handleEditGift(params.row)}
+                        sx={{ color: '#4dabf5', textTransform: 'none' }}
+                    >
+                        Edit
+                    </Button>
+                </Box>
             )
         }
     ];
@@ -177,9 +187,9 @@ export default function SantaDashboard() {
     const [modalOpen, setModalOpen] = useState(false);
 
     // Stock Modal State
-const [stockModalOpen, setStockModalOpen] = useState(false);
-const [stockGiftId, setStockGiftId] = useState<string | null>(null);
-const [stockValue, setStockValue] = useState('');
+    const [stockModalOpen, setStockModalOpen] = useState(false);
+    const [stockGiftId, setStockGiftId] = useState<string | null>(null);
+    const [stockValue, setStockValue] = useState('');
 
 
     const handlePackedToggle = useCallback(async (id: string, isPacked: boolean) => {
@@ -207,24 +217,51 @@ const [stockValue, setStockValue] = useState('');
 
     const { updateGiftStock } = useGift();
     const handleUpdateStock = useCallback((id: string, currentStock: number) => {
-  setStockGiftId(id);
-  setStockValue(currentStock.toString());
-  setStockModalOpen(true);
-}, []);
+        setStockGiftId(id);
+        setStockValue(currentStock.toString());
+        setStockModalOpen(true);
+    }, []);
 
 
-const confirmStockUpdate = async () => {
-  if (!stockGiftId) return;
+    const confirmStockUpdate = async () => {
+        if (!stockGiftId) return;
 
-  const newStock = parseInt(stockValue);
-  if (isNaN(newStock)) return;
+        const newStock = parseInt(stockValue);
+        if (isNaN(newStock)) return;
 
-  await updateGiftStock(stockGiftId, newStock);
-  setStockModalOpen(false);
-};
+        await updateGiftStock(stockGiftId, newStock);
+        setStockModalOpen(false);
+    };
+
+    // Edit Gift Modal State
+    const [editGiftModalOpen, setEditGiftModalOpen] = useState(false);
+    const [editingGiftId, setEditingGiftId] = useState<string | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editImage, setEditImage] = useState('');
+    const { fetchGifts } = useGift(); // Assuming fetchGifts is available to refresh data
+
+    const handleEditGift = useCallback((gift: any) => {
+        setEditingGiftId(gift._id);
+        setEditTitle(gift.title);
+        setEditImage(gift.image);
+        setEditGiftModalOpen(true);
+    }, []);
+
+    const { updateGift } = useGift();
+
+    const confirmGiftUpdate = async () => {
+        if (!editingGiftId) return;
+        try {
+            await updateGift(editingGiftId, { title: editTitle, image: editImage });
+            setEditGiftModalOpen(false);
+            setToastOpen(true); // Optional: show success toast if desired
+        } catch (error) {
+            console.error("Failed to update gift", error);
+        }
+    };
 
     const columns = useMemo(() => LETTER_COLUMNS(handleViewLetter, handlePackedToggle, handleStatusChange), [handleViewLetter, handlePackedToggle, handleStatusChange]);
-    const inventoryColumns = useMemo(() => getInventoryColumns(handleUpdateStock), [handleUpdateStock]);
+    const inventoryColumns = useMemo(() => getInventoryColumns(handleUpdateStock, handleEditGift), [handleUpdateStock, handleEditGift]);
 
     useEffect(() => {
         if (!santa) return;
@@ -548,92 +585,169 @@ const confirmStockUpdate = async () => {
                 </Box>
             </Modal>
 
-
+            {/* Edit Gift Modal */}
             <Modal
-  open={stockModalOpen}
-  onClose={() => setStockModalOpen(false)}
-  sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
->
-  <Box
-    sx={{
-      width: 320,
-      bgcolor: 'rgba(15, 25, 45, 0.95)',
-      borderRadius: 3,
-      p: 4,
-      border: '2px solid #F8B229',
-      boxShadow: '0 0 30px rgba(248,178,41,0.3)',
-      color: 'white',
-      textAlign: 'center',
-      backdropFilter: 'blur(10px)',
-    }}
-  >
-    <Typography variant="h6" sx={{ mb: 2, color: '#F8B229', fontWeight: 'bold' }}>
-      🎁 Update Gift Stock
-    </Typography>
+                open={editGiftModalOpen}
+                onClose={() => setEditGiftModalOpen(false)}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Box
+                    sx={{
+                        width: 320,
+                        bgcolor: 'rgba(15, 25, 45, 0.95)',
+                        borderRadius: 3,
+                        p: 4,
+                        border: '2px solid #F8B229',
+                        boxShadow: '0 0 30px rgba(248,178,41,0.3)',
+                        color: 'white',
+                        textAlign: 'center',
+                        backdropFilter: 'blur(10px)',
+                    }}
+                >
+                    <Typography variant="h6" sx={{ mb: 2, color: '#F8B229', fontWeight: 'bold' }}>
+                        ✏️ Edit Gift Details
+                    </Typography>
 
-    <TextField
-      type="number"
-      fullWidth
-      value={stockValue}
-      onChange={(e) => setStockValue(e.target.value)}
-      sx={{
-        mb: 3,
-        '& input': { color: 'white', textAlign: 'center', fontSize: 18 },
-        '& label': { color: 'rgba(255,255,255,0.7)' },
-        '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-      }}
-    />
+                    <TextField
+                        fullWidth
+                        label="Gift Title"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        sx={{
+                            mb: 2,
+                            '& input': { color: 'white' },
+                            '& label': { color: 'rgba(255,255,255,0.7)' },
+                            '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        }}
+                    />
 
-    <Box sx={{ display: 'flex', gap: 2 }}>
-      <Button
-        fullWidth
-        variant="outlined"
-        onClick={() => setStockModalOpen(false)}
-        sx={{ color: '#F8F3E6', borderColor: '#F8F3E6' }}
-      >
-        Cancel
-      </Button>
+                    <TextField
+                        fullWidth
+                        label="Image URL"
+                        value={editImage}
+                        onChange={(e) => setEditImage(e.target.value)}
+                        sx={{
+                            mb: 3,
+                            '& input': { color: 'white' },
+                            '& label': { color: 'rgba(255,255,255,0.7)' },
+                            '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        }}
+                    />
 
-      <Button
-        fullWidth
-        variant="contained"
-        onClick={confirmStockUpdate}
-        sx={{
-          bgcolor: '#165B33',
-          '&:hover': { bgcolor: '#124a2a' },
-          fontWeight: 'bold',
-        }}
-      >
-        Save
-      </Button>
-    </Box>
-  </Box>
-</Modal>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            onClick={() => setEditGiftModalOpen(false)}
+                            sx={{ color: '#F8F3E6', borderColor: '#F8F3E6' }}
+                        >
+                            Cancel
+                        </Button>
 
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            onClick={confirmGiftUpdate}
+                            sx={{
+                                bgcolor: '#165B33',
+                                '&:hover': { bgcolor: '#124a2a' },
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            Save
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
+
+            {/* Stock Modal */}
+            <Modal
+                open={stockModalOpen}
+                onClose={() => setStockModalOpen(false)}
+                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+                <Box
+                    sx={{
+                        width: 320,
+                        bgcolor: 'rgba(15, 25, 45, 0.95)',
+                        borderRadius: 3,
+                        p: 4,
+                        border: '2px solid #F8B229',
+                        boxShadow: '0 0 30px rgba(248,178,41,0.3)',
+                        color: 'white',
+                        textAlign: 'center',
+                        backdropFilter: 'blur(10px)',
+                    }}
+                >
+                    <Typography variant="h6" sx={{ mb: 2, color: '#F8B229', fontWeight: 'bold' }}>
+                        🎁 Update Gift Stock
+                    </Typography>
+
+                    <Typography variant="body2" sx={{ mb: 2, color: 'rgba(255,255,255,0.7)' }}>
+                        {gifts.find(g => g._id === stockGiftId)?.title}
+                    </Typography>
+
+                    <TextField
+                        type="number"
+                        fullWidth
+                        value={stockValue}
+                        onChange={(e) => setStockValue(e.target.value)}
+                        sx={{
+                            mb: 3,
+                            '& input': { color: 'white', textAlign: 'center', fontSize: 18 },
+                            '& label': { color: 'rgba(255,255,255,0.7)' },
+                            '& fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+                        }}
+                    />
+
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            onClick={() => setStockModalOpen(false)}
+                            sx={{ color: '#F8F3E6', borderColor: '#F8F3E6' }}
+                        >
+                            Cancel
+                        </Button>
+
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            onClick={confirmStockUpdate}
+                            sx={{
+                                bgcolor: '#165B33',
+                                '&:hover': { bgcolor: '#124a2a' },
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            Save
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
 
             <Snackbar
-  open={toastOpen}
-  autoHideDuration={3500}
-  onClose={() => setToastOpen(false)}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
->
-  <Alert
-    onClose={() => setToastOpen(false)}
-    severity="success"
-    sx={{
-      bgcolor: '#165B33',
-      color: '#F8F3E6',
-      fontWeight: 'bold',
-      border: '1px solid #F8B229',
-      boxShadow: '0 0 20px rgba(248,178,41,0.5)',
-      fontFamily: 'var(--font-inter)',
-    }}
-    icon={false}
-  >
-    🎄 Gift successfully added to Santa's workshop!
-  </Alert>
-</Snackbar>
+                open={toastOpen}
+                autoHideDuration={3500}
+                onClose={() => setToastOpen(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setToastOpen(false)}
+                    severity="success"
+                    sx={{
+                        bgcolor: '#165B33',
+                        color: '#F8F3E6',
+                        fontWeight: 'bold',
+                        border: '1px solid #F8B229',
+                        boxShadow: '0 0 20px rgba(248,178,41,0.5)',
+                        fontFamily: 'var(--font-inter)',
+                    }}
+                    icon={false}
+                >
+                    🎄 Gift successfully added to Santa's workshop!
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
-

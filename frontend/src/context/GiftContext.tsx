@@ -7,6 +7,7 @@ interface GiftContextType {
     gifts: Gift[];
     addGift: (gift: Omit<Gift, '_id'>) => Promise<void>;
     updateGiftStock: (id: string, stock: number) => Promise<void>;
+    updateGift: (id: string, updates: Partial<Gift>) => Promise<void>;
 }
 
 const GiftContext = createContext<GiftContextType | undefined>(undefined);
@@ -45,8 +46,17 @@ export function GiftProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const updateGiftHandler = async (id: string, updates: Partial<Gift>) => {
+        try {
+            const updated = await updateGift(id, updates);
+            setGifts((prev) => prev.map(g => g._id === id ? updated : g));
+        } catch (error) {
+            console.error("Failed to update gift", error);
+        }
+    };
+
     return (
-        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler, updateGiftStock: updateGiftStockHandler }}>
+        <GiftContext.Provider value={{ gifts, addGift: addGiftHandler, updateGiftStock: updateGiftStockHandler, updateGift: updateGiftHandler }}>
             {children}
         </GiftContext.Provider>
     );
