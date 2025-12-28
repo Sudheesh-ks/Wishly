@@ -79,6 +79,16 @@ export class LetterService implements ILetterService {
   async createLetter(data: any) {
     const { childName, location, wishList, content, giftId } = data;
 
+    // Check for duplicate letter
+    const existingLetter = await this._letterRepo.findOne({
+      childName: { $regex: new RegExp(`^${childName}$`, 'i') },
+      location: { $regex: new RegExp(`^${location}$`, 'i') }
+    });
+
+    if (existingLetter) {
+      throw new Error('You have already sent a letter! Santa is busy checking it.');
+    }
+
     const analysisText = content || (typeof wishList === 'string' ? wishList : '');
     const status: LetterStatus = await analyzeLetterContent(analysisText);
 
