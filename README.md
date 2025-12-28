@@ -57,6 +57,22 @@ This project demonstrates a real-world full-stack architecture with modern techn
 
 ---
 
+## 🖼️ Screenshots
+
+### 🧒 User Dashboard
+![User Dashboard](./screenshots/user-dashboard.png)
+
+### 🎅 Santa Dashboard
+![Santa Dashboard](./screenshots/santa-dashboard.png)
+
+### ✉️ Letter Writing
+![Letter Editor](./screenshots/letter-editor.png)
+
+### 🎁 Gift Gallery
+![Gift Gallery](./screenshots/gift-gallery.png)
+
+---
+
 ## ⚙️ Setup Instructions
 
 ### 1️⃣ Clone the repository
