@@ -62,11 +62,11 @@ This project demonstrates a real-world full-stack architecture with modern techn
 ### 🧒 User Dashboard
 ![User Dashboard](./screenshots/user-dashboard.png)
 
-### 🎅 Santa Dashboard
-![Santa Dashboard](./screenshots/santa-dashboard.png)
-
 ### ✉️ Letter Writing
 ![Letter Editor](./screenshots/letter-editor.png)
+
+### 🎅 Santa Dashboard
+![Santa Dashboard](./screenshots/santa-dashboard.png)
 
 ### 🎁 Gift Gallery
 ![Gift Gallery](./screenshots/gift-gallery.png)
