@@ -25,7 +25,6 @@ function AuthCallbackHandler() {
           router.replace('/dashboard');
         } catch (e) {
           console.error('Auth Callback: Error during refresh/redirect:', e);
-          // Fallback redirect even if refresh fails?
           router.replace('/dashboard');
         }
       } else {

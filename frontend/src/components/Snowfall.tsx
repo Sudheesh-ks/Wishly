@@ -63,7 +63,6 @@ const Snowfall = () => {
 
                 if (p.x > w + 5 || p.x < -5 || p.y > h) {
                     if (i % 3 > 0) {
-                        // 66.67% of the flakes
                         particles[i] = {
                             x: Math.random() * w,
                             y: -10,
@@ -72,9 +71,7 @@ const Snowfall = () => {
                             speed: p.speed,
                         };
                     } else {
-                        // If the flake is exitting from the right
                         if (Math.sin(angle) > 0) {
-                            // Enter from the left
                             particles[i] = {
                                 x: -5,
                                 y: Math.random() * h,
@@ -83,7 +80,6 @@ const Snowfall = () => {
                                 speed: p.speed,
                             };
                         } else {
-                            // Enter from the right
                             particles[i] = {
                                 x: w + 5,
                                 y: Math.random() * h,

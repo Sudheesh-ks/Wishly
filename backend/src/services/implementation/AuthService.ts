@@ -41,7 +41,6 @@ export class AuthService implements IAuthService {
       token = userToken;
       targetRole = 'user';
     } else {
-      // Fallback or mixed scenario (prioritize existing logic or user)
       token = userToken || santaToken;
       targetRole = userToken ? 'user' : 'santa';
     }

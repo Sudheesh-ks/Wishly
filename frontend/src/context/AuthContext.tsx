@@ -52,8 +52,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 return response.data.token;
             }
         } catch (err) {
-            // If refresh fails (e.g., 401), we should clear the token
-            // Do NOT log error as "Failed" if it's just a missing cookie/empty state on load
             if (axios.isAxiosError(err) && err.response?.status !== 401) {
                 console.error('Failed to refresh santa token:', err);
             }
@@ -66,7 +64,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         let token = localStorage.getItem('wishly_user_token');
 
         if (!token) {
-            // Try to refresh
             token = await refreshUserToken();
             if (!token) {
                 setUser(null);
@@ -84,7 +81,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
         } catch (err: any) {
             if (err.response?.status === 401) {
-                // Token expired, try refresh
                 token = await refreshUserToken();
                 if (token) {
                     try {
@@ -112,7 +108,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         let token = localStorage.getItem('wishly_santa_token');
 
         if (!token) {
-            // Try to refresh
             token = await refreshSantaToken();
             if (!token) {
                 setSanta(null);
@@ -130,7 +125,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(null);
         } catch (err: any) {
             if (err.response?.status === 401) {
-                // Token expired, try refresh
                 token = await refreshSantaToken();
                 if (token) {
                     try {

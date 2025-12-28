@@ -12,7 +12,6 @@ const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, onError, setSen
     const [isSealed, setIsSealed] = useState(false);
     const [childName, setChildName] = useState('');
     const [location, setLocation] = useState('');
-    // const [error, setError] = useState<string | null>(null); // Removed local error
     const [success, setSuccess] = useState(false);
     const [sending, setLocalSending] = useState(false);
 
@@ -198,7 +197,7 @@ const LetterEditor = ({ onSendSuccess, onSendEmpty, onFormError, onError, setSen
                                             size={26}
                                             thickness={5}
                                             sx={{
-                                                color: '#F8B229',   // gold spinner on red button 🎄
+                                                color: '#F8B229',   
                                             }}
                                         />
                                     ) : (

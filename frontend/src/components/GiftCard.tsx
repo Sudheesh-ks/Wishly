@@ -25,8 +25,8 @@ const GiftCard = ({ title, image, stock = 0, onAdd }: GiftCardProps) => {
             sx={{
                 width: '100%',
                 maxWidth: 340,
-                mx: 'auto', // Centering
-                minHeight: 380, // Allow expansion
+                mx: 'auto', 
+                minHeight: 380, 
                 height: 'auto',
                 display: 'flex',
                 flexDirection: 'column',

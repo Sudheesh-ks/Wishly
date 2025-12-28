@@ -10,7 +10,7 @@ import Snowfall from '@/components/Snowfall';
 import { useGift } from '@/context/GiftContext';
 import { useAuth } from '@/context/AuthContext';
 import santaApi from '@/services/santaApi';
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
 import Checkbox from '@mui/material/Checkbox';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
@@ -94,7 +94,7 @@ const LETTER_COLUMNS = (
                         size="small"
                         variant="outlined"
                         onClick={() => {
-                            if (params.value === 'Sorting') return; // Don't allow manual override
+                            if (params.value === 'Sorting') return;
                         }}
                         sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}
                     />
@@ -238,7 +238,7 @@ export default function SantaDashboard() {
     const [editingGiftId, setEditingGiftId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
     const [editImage, setEditImage] = useState('');
-    const { fetchGifts } = useGift(); // Assuming fetchGifts is available to refresh data
+    const { fetchGifts } = useGift(); 
 
     const handleEditGift = useCallback((gift: any) => {
         setEditingGiftId(gift._id);
@@ -254,7 +254,7 @@ export default function SantaDashboard() {
         try {
             await updateGift(editingGiftId, { title: editTitle, image: editImage });
             setEditGiftModalOpen(false);
-            setToastOpen(true); // Optional: show success toast if desired
+            setToastOpen(true); 
         } catch (error) {
             console.error("Failed to update gift", error);
         }
@@ -336,7 +336,7 @@ export default function SantaDashboard() {
     }
 
     if (!santa) {
-        return null; // Will redirect
+        return null; 
     }
 
     return (
@@ -396,23 +396,6 @@ export default function SantaDashboard() {
                                     <MenuItem value="Sorting">⏳ Sorting</MenuItem>
                                 </Select>
                             </FormControl>
-
-                            {/* <FormControl size="small" sx={{ width: 200, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
-                                <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Filter Gift</InputLabel>
-                                <Select
-                                    value={selectedGift}
-                                    label="Filter Gift"
-                                    onChange={(e) => setSelectedGift(e.target.value)}
-                                    sx={{ color: 'white', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
-                                >
-                                    <MenuItem value="">All Gifts</MenuItem>
-                                    {gifts.map((gift) => (
-                                        <MenuItem key={gift._id} value={gift._id}>
-                                            🎁 {gift.title}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl> */}
 
                             <TextField
                                 size="small"
@@ -540,7 +523,7 @@ export default function SantaDashboard() {
                     position: 'relative',
                     width: '100%',
                     maxWidth: 500,
-                    bgcolor: '#f4e4bc', // Aged paper color
+                    bgcolor: '#f4e4bc', 
                     boxShadow: 24,
                     p: 4,
                     borderRadius: 1,

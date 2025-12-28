@@ -47,7 +47,7 @@ export default function SantaLoginPage() {
     }
 
     if (santa) {
-        return null; // Will redirect
+        return null; 
     }
 
     return (
@@ -68,7 +68,7 @@ export default function SantaLoginPage() {
                             flexDirection: 'column',
                             alignItems: 'center',
                             backdropFilter: 'blur(20px)',
-                            background: 'rgba(212, 36, 38, 0.1)', // Red tint for Santa
+                            background: 'rgba(212, 36, 38, 0.1)', 
                             border: '1px solid rgba(255, 255, 255, 0.2)',
                             borderRadius: 8,
                             boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',

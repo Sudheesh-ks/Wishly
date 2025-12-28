@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import './config/passport'; // Initialize passport
+import './config/passport'; 
 import { connectDB } from './config/mongodb';
 import authRouter from './routes/auth.routes';
 import giftRouter from './routes/gift.routes';

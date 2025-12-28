@@ -233,7 +233,7 @@ export default function DashboardPage() {
         </Alert>
       </Snackbar>
 
-      {/* General Error Toast (Dynamic Message) */}
+      {/* General Error Toast */}
       <Snackbar
         open={!!generalError}
         autoHideDuration={4000}
